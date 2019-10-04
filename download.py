@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import newspaper, uuid, os, json, sys
+import newspaper, uuid, os, json, sys, nltk
 
 NEWSPAPERS = {
     'ft': 'https://www.ft.com',
@@ -35,6 +35,9 @@ def dateToIso(i):
         isoDate = article.publish_date.isoformat()
     except:
         return isoDate
+
+# download nltk english 
+nltk.download()
 
 # which newspaper to load?
 if sys.argv[1] not in NEWSPAPERS:
