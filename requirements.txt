@@ -1,0 +1,4 @@
+requests==2.20.0
+newspaper3k==0.2.8
+nltk==3.2.1
+PyYAML==5.1.2
