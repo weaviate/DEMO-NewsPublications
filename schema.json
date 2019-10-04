@@ -1,0 +1,133 @@
+{
+    "actions": {
+        "classes": [],
+        "type": "action"
+    },
+    "things": {
+        "classes": [
+            {
+                "class": "Publication",
+                "description": "A publication with an online source",
+                "keywords": [
+                    {
+                        "keyword": "newspaper",
+                        "weight": 1.0
+                    },{
+                        "keyword": "magazine",
+                        "weight": 1.0
+                    }
+                ],
+                "properties": [
+                    {
+                        "dataType": [
+                            "string"
+                        ],
+                        "description": "Name of the publication",
+                        "name": "name"
+                    },
+                    {
+                        "dataType": [
+                            "Article"
+                        ],
+                        "description": "The articles this publication has",
+                        "name": "hasArticles",
+                        "cardinality": "many"
+                    }
+                ]
+            },
+            {
+                "class": "Author",
+                "description": "Normalised types",
+                "keywords": [
+                    {
+                        "keyword": "writer",
+                        "weight": 0.8
+                    }
+                ],
+                "properties": [
+                    {
+                        "dataType": [
+                            "string"
+                        ],
+                        "description": "Name of the author",
+                        "name": "name"
+                    },
+                    {
+                        "cardinality": "many",
+                        "dataType": [
+                            "Article"
+                        ],
+                        "description": "Articles this author wrote",
+                        "name": "wroteArticles"
+                    },
+                    {
+                        "cardinality": "many",
+                        "dataType": [
+                            "Publication"
+                        ],
+                        "description": "The publication this author writes for",
+                        "name": "writesFor"
+                    }
+                ]
+            },
+            {
+                "class": "Article",
+                "description": "Normalised types",
+                "properties": [
+                    {
+                        "dataType": [
+                            "string"
+                        ],
+                        "description": "title of the article",
+                        "name": "title"
+                    },
+                    {
+                        "dataType": [
+                            "string"
+                        ],
+                        "description": "url of the article",
+                        "name": "url"
+                    },
+                    {
+                        "dataType": [
+                            "string"
+                        ],
+                        "description": "summary of the article",
+                        "name": "summary"
+                    },
+                    {
+                        "dataType": [
+                            "date"
+                        ],
+                        "description": "date of publication of the article",
+                        "name": "publicationDate"
+                    },
+                    {
+                        "dataType": [
+                            "int"
+                        ],
+                        "description": "Words in this article",
+                        "name": "wordCount"
+                    },
+                    {
+                        "dataType": [
+                            "Author", "Publication"
+                        ],
+                        "description": "authors this article has",
+                        "name": "hasAuthors",
+                        "cardinality": "many"
+                    },
+                    {
+                        "dataType": [
+                            "Publication"
+                        ],
+                        "description": "publication this article is in",
+                        "name": "inPublication",
+                        "cardinality": "atMostOne"
+                    }
+                ]
+            }
+        ],
+        "type": "thing"
+    }
+}
