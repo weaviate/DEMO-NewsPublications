@@ -11,4 +11,4 @@ weaviate-cli schema-truncate --force
 weaviate-cli schema-import --location=/root/DEMO-NewsPublications/schema.json
 
 # import into Weaviate
-/root/DEMO-NewsPublications/import.sh $1
+/root/DEMO-NewsPublications/import.py $1
