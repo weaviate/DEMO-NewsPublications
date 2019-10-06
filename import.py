@@ -3,8 +3,7 @@ import newspaper, uuid, os, json, sys, time
 from modules.Weaviate import Weaviate
 from modules.Weaviate import getWeaviateUrlFromConfigFile
 
-weaviateurl = getWeaviateUrlFromConfigFile()
-weaviate = Weaviate(weaviateurl)
+weaviate = Weaviate(sys.argv[1])
 
 ##
 # Function to clean up data
