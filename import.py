@@ -3,7 +3,8 @@ import newspaper, uuid, os, json, sys, time
 from modules.Weaviate import Weaviate
 from modules.Weaviate import getWeaviateUrlFromConfigFile
 
-weaviate = Weaviate(sys.argv[1])
+WEAVIATE = Weaviate(sys.argv[1])
+CACHEDIR = sys.argv[2]
 
 ##
 # Function to clean up data
@@ -25,7 +26,7 @@ def processInput(k, v):
 ## 
 print('add publications')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'ft')),
     'schema': {
@@ -33,7 +34,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt')),
     'schema': {
@@ -41,7 +42,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'guardian')),
     'schema': {
@@ -49,7 +50,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'wsj')),
     'schema': {
@@ -57,7 +58,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'cnn')),
     'schema': {
@@ -65,7 +66,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'fn')),
     'schema': {
@@ -73,7 +74,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'econ')),
     'schema': {
@@ -81,7 +82,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'newyorker')),
     'schema': {
@@ -89,7 +90,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'wired')),
     'schema': {
@@ -97,7 +98,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'vogue')),
     'schema': {
@@ -105,7 +106,7 @@ weaviate.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
-weaviate.runREST('/v1/things', {
+WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'gi')),
     'schema': {
@@ -119,9 +120,9 @@ weaviate.runREST('/v1/things', {
 print('add authors')
 
 authors = {}
-for filename in os.listdir('./cache'):
+for filename in os.listdir(CACHEDIR):
     if filename.endswith(".json"):
-        with open('./cache/' + filename) as f:
+        with open(CACHEDIR' + '/' + filename) as f:
             obj = json.load(f)
             for author in obj['authors']:
                 authors[processInput('Author', author)] = obj['publicationId']
@@ -130,7 +131,7 @@ for filename in os.listdir('./cache'):
 i = 1
 for author, publication in authors.items():
     if len(author.split(' ')) == 2:
-        weaviate.runREST('/v1/things', {
+        WEAVIATE.runREST('/v1/things', {
             'class': 'Author',
             'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, author)),
             'schema': {
@@ -151,9 +152,9 @@ for author, publication in authors.items():
 print('add articles')
 articles = {}
 validator = []
-for filename in os.listdir('./cache'):
+for filename in os.listdir(CACHEDIR):
     if filename.endswith(".json"):
-        with open('./cache/' + filename) as f:
+        with open(CACHEDIR' + '/' + filename) as f:
             obj = json.load(f)
             authors = []
             for author in obj['authors']:
@@ -197,10 +198,10 @@ for filename in os.listdir('./cache'):
                     articleObj['publicationDate'] = obj['pubDate']
 
                 # add to weaviate
-                weaviate.runREST('/v1/things', articleObj, 0, 'POST')
+                WEAVIATE.runREST('/v1/things', articleObj, 0, 'POST')
 
                 # update publication to include this article
-                weaviate.runREST('/v1/things/'+obj['publicationId']+'/references/hasArticles', {
+                WEAVIATE.runREST('/v1/things/'+obj['publicationId']+'/references/hasArticles', {
                     'beacon': 'weaviate://localhost/things/' + str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title']))
                 }, 0, 'POST')
 
@@ -208,7 +209,7 @@ for filename in os.listdir('./cache'):
                 for author in obj['authors']:
                     # check if relation should be through author or publication
                     if len(processInput('Author', author).split(' ')) == 2:
-                        weaviate.runREST('/v1/things/'+str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author)))+'/references/wroteArticles', {
+                        WEAVIATE.runREST('/v1/things/'+str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author)))+'/references/wroteArticles', {
                             'beacon': 'weaviate://localhost/things/' + str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title']))
                         }, 0, 'POST')
                     
