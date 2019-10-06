@@ -2,4 +2,4 @@
 import nltk
 
 # download nltk english 
-nltk.download()
+nltk.download('all')
