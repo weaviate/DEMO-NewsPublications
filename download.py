@@ -37,7 +37,7 @@ def dateToIso(i):
         return isoDate
 
 # download nltk english 
-nltk.download()
+# nltk.download()
 
 # which newspaper to load?
 if sys.argv[1] not in NEWSPAPERS:
