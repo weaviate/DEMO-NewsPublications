@@ -122,7 +122,7 @@ print('add authors')
 authors = {}
 for filename in os.listdir(CACHEDIR):
     if filename.endswith(".json"):
-        with open(CACHEDIR' + '/' + filename) as f:
+        with open(CACHEDIR + '/' + filename) as f:
             obj = json.load(f)
             for author in obj['authors']:
                 authors[processInput('Author', author)] = obj['publicationId']
@@ -154,7 +154,7 @@ articles = {}
 validator = []
 for filename in os.listdir(CACHEDIR):
     if filename.endswith(".json"):
-        with open(CACHEDIR' + '/' + filename) as f:
+        with open(CACHEDIR + '/' + filename) as f:
             obj = json.load(f)
             authors = []
             for author in obj['authors']:
