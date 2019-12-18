@@ -120,7 +120,7 @@ WEAVIATE.runREST('/v1/things', {
 ##
 WEAVIATE.runREST('/v1/things', {
     'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Environmental')),
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Art')),
     'schema': {
         'name': 'Art'
     }
@@ -128,7 +128,7 @@ WEAVIATE.runREST('/v1/things', {
 
 WEAVIATE.runREST('/v1/things', {
     'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Environmental')),
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Music')),
     'schema': {
         'name': 'Music'
     }
@@ -136,7 +136,7 @@ WEAVIATE.runREST('/v1/things', {
 
 WEAVIATE.runREST('/v1/things', {
     'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Environmental')),
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Movies')),
     'schema': {
         'name': 'Movies'
     }
@@ -224,7 +224,7 @@ WEAVIATE.runREST('/v1/things', {
 
 WEAVIATE.runREST('/v1/things', {
     'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Government')),
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Business')),
     'schema': {
         'name': 'Business'
     }
