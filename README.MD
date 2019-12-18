@@ -2,6 +2,8 @@
 
 This demo shows how Weaviate can be used to explore magazines and newspapers.
 
+_ARTICLES ARE USED FOR DEMO PURPOSES ONLY!_
+
 _IF YOU WANT TO USE THIS DEMO, JUST RUN THE DOCKER FROM THE DOCS http://127.0.0.1:4000/documentation/weaviate/current/index.html_
 
 ## Installation
