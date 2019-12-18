@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-import newspaper, uuid, os, json, sys, time
+import newspaper, uuid, os, json, sys, time, weaviate
 from modules.Weaviate import Weaviate
 from modules.Weaviate import getWeaviateUrlFromConfigFile
 
 WEAVIATE = Weaviate(sys.argv[1])
 CACHEDIR = sys.argv[2]
+CLIENT = weaviate.Client(WEAVIATE)
 
 ##
 # Function to clean up data
@@ -212,22 +213,20 @@ for filename in os.listdir(CACHEDIR):
 
 # add to weaviate
 i = 1
+batch = weaviate.ThingsBatchRequest()
 for author, publication in authors.items():
     if len(author.split(' ')) == 2:
-        WEAVIATE.runREST('/v1/things', {
-            'class': 'Author',
-            'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, author)),
-            'schema': {
+        batch.add_thing({
                 'name': author,
                 'writesFor': [
                     {
                         'beacon': 'weaviate://localhost/things/' + publication
                     }
                 ]
-            }
-        }, 0, 'POST')
+            }, 'Author', str(uuid.uuid3(uuid.NAMESPACE_DNS, author)))
     print(i, 'out of', len(authors), 'Authors')
     i += 1
+CLIENT.create_things_in_batch(batch)
 
 ##
 # Import the articles without refs
@@ -235,6 +234,8 @@ for author, publication in authors.items():
 print('add articles')
 articles = {}
 validator = []
+batchThings = weaviate.ThingsBatchRequest()
+batchRefs = weaviate.ReferenceBatchRequest()
 for filename in os.listdir(CACHEDIR):
     if filename.endswith(".json"):
         with open(CACHEDIR + '/' + filename) as f:
@@ -256,20 +257,16 @@ for filename in os.listdir(CACHEDIR):
                 wordCount += len(paragraph.split(' '))
 
             articleObj = {
-                'class': 'Article',
-                'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])),
-                'schema': {
-                    'title': obj['title'],
-                    'summary': processInput('Summary', obj['summary']),
-                    'hasAuthors': authors,
-                    'wordCount': wordCount,
-                    'url': obj['url'],
-                    'inPublication': [
-                        {
-                            'beacon': 'weaviate://localhost/things/' + obj['publicationId']
-                        }
-                    ]
-                }
+                'title': obj['title'],
+                'summary': processInput('Summary', obj['summary']),
+                'hasAuthors': authors,
+                'wordCount': wordCount,
+                'url': obj['url'],
+                'inPublication': [
+                    {
+                        'beacon': 'weaviate://localhost/things/' + obj['publicationId']
+                    }
+                ]
             }
 
             if articleObj['id'] not in validator:
@@ -281,19 +278,16 @@ for filename in os.listdir(CACHEDIR):
                     articleObj['publicationDate'] = obj['pubDate']
 
                 # add to weaviate
-                WEAVIATE.runREST('/v1/things', articleObj, 0, 'POST')
-
-                # update publication to include this article
-                WEAVIATE.runREST('/v1/things/'+obj['publicationId']+'/references/hasArticles', {
-                    'beacon': 'weaviate://localhost/things/' + str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title']))
-                }, 0, 'POST')
+                batchThings.add_thing(articleObj, "Article", str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])))
+                batchRefs.add_reference("Publication", obj['publicationId'], "hasArticles", str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])))
 
                 # update author to include this article
                 for author in obj['authors']:
                     # check if relation should be through author or publication
                     if len(processInput('Author', author).split(' ')) == 2:
-                        WEAVIATE.runREST('/v1/things/'+str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author)))+'/references/wroteArticles', {
-                            'beacon': 'weaviate://localhost/things/' + str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title']))
-                        }, 0, 'POST')
+                        batchRefs.add_reference("Author", str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author))), "wroteArticles", str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])))
                     
                 print('Added: ' + obj['title'])
+
+CLIENT.create_things_in_batch(batchThings)
+CLIENT.add_references_in_batch(batchRefs)
