@@ -28,4 +28,4 @@ Execute the import
 ## Create Docker
 
 1. `$ docker build . --tag="semitechnologies/weaviate-demo-newspublications:latest" --no-cache`
-2. `$ docker push semitechnologies/weaviate-demo-newspublications`
+2. `$ docker push semitechnologies/weaviate-demo-newspublications:latest`
