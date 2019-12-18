@@ -90,7 +90,7 @@
                     },
                     {
                         "dataType": [
-                            "string"
+                            "text"
                         ],
                         "description": "summary of the article",
                         "name": "summary"
@@ -124,6 +124,27 @@
                         "description": "publication this article is in",
                         "name": "inPublication",
                         "cardinality": "atMostOne"
+                    },
+                    {
+                        "dataType": [
+                            "Category"
+                        ],
+                        "description": "category this article is off",
+                        "name": "ofCategory",
+                        "cardinality": "atMostOne"
+                    }
+                ]
+            },
+            {
+                "class": "Category",
+                "description": "Category an article is a type off",
+                "properties": [
+                    {
+                        "dataType": [
+                            "string"
+                        ],
+                        "description": "category name",
+                        "name": "name"
                     }
                 ]
             }

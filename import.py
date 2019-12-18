@@ -115,6 +115,89 @@ WEAVIATE.runREST('/v1/things', {
 }, 0, 'POST')
 
 ##
+# Add categories
+##
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Environmental')),
+    'schema': {
+        'name': 'Environmental'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Recreation')),
+    'schema': {
+        'name': 'Recreation'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Weather')),
+    'schema': {
+        'name': 'Weather'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Technology')),
+    'schema': {
+        'name': 'Technology'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Science')),
+    'schema': {
+        'name': 'Science'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Sports')),
+    'schema': {
+        'name': 'Sports'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Religion')),
+    'schema': {
+        'name': 'Religion'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Politics')),
+    'schema': {
+        'name': 'Politics'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Media')),
+    'schema': {
+        'name': 'Media'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Category',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Government')),
+    'schema': {
+        'name': 'Government'
+    }
+}, 0, 'POST')
+
+##
 # Import the authors without refs
 ##
 print('add authors')
