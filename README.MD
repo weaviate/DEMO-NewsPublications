@@ -1,6 +1,8 @@
 # Newspapers and Magazine // Weaviate
 
-This demo shows how Weaviate can be used to explore magazines and newspapers
+This demo shows how Weaviate can be used to explore magazines and newspapers.
+
+_IF YOU WANT TO USE THIS DEMO, JUST RUN THE DOCKER FROM THE DOCS http://127.0.0.1:4000/documentation/weaviate/current/index.html_
 
 ## Installation
 
@@ -22,3 +24,8 @@ Execute the import
 3. `$ weaviate-cli cluster-create`
 4. `$ weaviate-cli schema-import --location=schema.json`
 5. `$ ./import.py`
+
+## Create Docker
+
+1. `$ docker build . --tag="docker push semitechnologies/weaviate-demo-newspublications:latest"`
+2. `$ docker push semitechnologies/weaviate-demo-newspublications`
