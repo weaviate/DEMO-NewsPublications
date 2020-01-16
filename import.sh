@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# when using with Docker compose we need to sleep
+echo "Sleeping to make sure all services are up and running"
+sleep 16
+
 # Inform
 echo "Importing $1"
 
