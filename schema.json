@@ -8,6 +8,7 @@
             {
                 "class": "Publication",
                 "description": "A publication with an online source",
+                "vectorizeClassName": false,
                 "keywords": [
                     {
                         "keyword": "newspaper",
@@ -38,6 +39,7 @@
             {
                 "class": "Author",
                 "description": "Normalised types",
+                "vectorizeClassName": true,
                 "keywords": [
                     {
                         "keyword": "writer",
@@ -50,7 +52,8 @@
                             "string"
                         ],
                         "description": "Name of the author",
-                        "name": "name"
+                        "name": "name",
+                        "vectorizePropertyName": false
                     },
                     {
                         "cardinality": "many",
@@ -73,27 +76,34 @@
             {
                 "class": "Article",
                 "description": "Normalised types",
+                "vectorizeClassName": false,
                 "properties": [
                     {
                         "dataType": [
                             "string"
                         ],
                         "description": "title of the article",
-                        "name": "title"
+                        "name": "title",
+                        "vectorizePropertyName": false,
+                        "index": true
                     },
                     {
                         "dataType": [
                             "string"
                         ],
                         "description": "url of the article",
-                        "name": "url"
+                        "name": "url",
+                        "vectorizePropertyName": false,
+                        "index": false
                     },
                     {
                         "dataType": [
                             "text"
                         ],
                         "description": "summary of the article",
-                        "name": "summary"
+                        "name": "summary",
+                        "vectorizePropertyName": false,
+                        "index": true
                     },
                     {
                         "dataType": [
@@ -138,13 +148,16 @@
             {
                 "class": "Category",
                 "description": "Category an article is a type off",
+                "vectorizeClassName": false,
                 "properties": [
                     {
                         "dataType": [
                             "string"
                         ],
                         "description": "category name",
-                        "name": "name"
+                        "name": "name",
+                        "vectorizePropertyName": false,
+                        "index": true
                     }
                 ]
             }

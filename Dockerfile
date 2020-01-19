@@ -14,9 +14,12 @@ RUN cd /root && \
     pip3 install -r requirements.txt && \
     ln -s $(pwd)/bin/weaviate-cli /usr/local/bin/weaviate-cli
 
-RUN cd /root && \
-    git clone --depth=1 https://github.com/semi-technologies/DEMO-NewsPublications && \
-    cd DEMO-NewsPublications && \
+RUN mkdir -p /root/DEMO-NewsPublications && \
+    cd /root/DEMO-NewsPublications
+
+COPY . /root/DEMO-NewsPublications
+
+RUN cd /root/DEMO-NewsPublications && \
     pip3 install -r requirements.txt && \
     chmod +x /root/DEMO-NewsPublications/import.sh
 

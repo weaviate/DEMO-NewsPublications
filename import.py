@@ -45,6 +45,22 @@ WEAVIATE.runREST('/v1/things', {
 
 WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt-small')),
+    'schema': {
+        'name': 'New York Times'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Publication',
+    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt-company')),
+    'schema': {
+        'name': 'The New York Times Company'
+    }
+}, 0, 'POST')
+
+WEAVIATE.runREST('/v1/things', {
+    'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'guardian')),
     'schema': {
         'name': 'The Guardian International'
