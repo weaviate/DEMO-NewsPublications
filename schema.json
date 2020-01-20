@@ -28,6 +28,13 @@
                     },
                     {
                         "dataType": [
+                            "geoCoordinates"
+                        ],
+                        "description": "Geo location of the HQ",
+                        "name": "headquartersGeoLocation"
+                    },
+                    {
+                        "dataType": [
                             "Article"
                         ],
                         "description": "The articles this publication has",

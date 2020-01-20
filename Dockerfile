@@ -3,7 +3,7 @@ FROM alpine:3.10.2
 ENV weaviate_host "http://localhost:8080"
 ARG weaviate_host=${weaviate_host}
 
-RUN apk add --no-cache build-base python-dev python3 py3-pillow py3-lxml g++ make git bash && \
+RUN apk add --no-cache build-base python-dev python3 py3-pillow py3-lxml g++ make git bash curl && \
     pip3 install --upgrade pip
 
 ENV LIBRARY_PATH=/lib:/usr/lib

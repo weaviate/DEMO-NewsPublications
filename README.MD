@@ -6,7 +6,7 @@ _ARTICLES ARE USED FOR DEMO PURPOSES ONLY!_
 
 _IF YOU WANT TO USE THIS DEMO, JUST RUN THE DOCKER FROM THE DOCS http://127.0.0.1:4000/documentation/weaviate/current/index.html_
 
-## Installation
+## Installation (for collecting data)
 
 Make sure to have Python3 and pip3 installed.
 
@@ -31,3 +31,10 @@ Execute the import
 
 1. `$ docker build . --tag="semitechnologies/weaviate-demo-newspublications:latest" --no-cache`
 2. `$ docker push semitechnologies/weaviate-demo-newspublications:latest`
+
+## Import data without Docker
+
+0. Clone this repo.
+0. `$ pip3 install -r requirements.txt`
+0. [Install weaviate-cli](https://www.semi.technology/documentation/weaviate-cli/current/installation.html).
+0. Run `./import.sh {URL TO YOUR WEAVIATE}` e.g., `./import.sh http://localhost:8080`

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import newspaper, uuid, os, json, sys, time, weaviate
+import newspaper, uuid, os, json, sys, time, weaviate, time
 from modules.Weaviate import Weaviate
 from modules.Weaviate import getWeaviateUrlFromConfigFile
 
@@ -23,7 +23,7 @@ def processInput(k, v):
     return v
 
 ##
-# Import the publications without refs
+# Import the publications without refs except for cities
 ## 
 print('add publications')
 
@@ -31,7 +31,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'ft')),
     'schema': {
-        'name': 'Financial Times'
+        'name': 'Financial Times',
+        'headquartersGeoLocation': {
+            "latitude": 51.5127391, 
+            "longitude": -0.0962234
+        }
     }
 }, 0, 'POST')
 
@@ -39,7 +43,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt')),
     'schema': {
-        'name': 'International New York Times'
+        'name': 'International New York Times',
+        'headquartersGeoLocation': {
+            "latitude": 51.5127391,
+            "longitude": -0.0962234
+        }
     }
 }, 0, 'POST')
 
@@ -47,7 +55,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt-small')),
     'schema': {
-        'name': 'New York Times'
+        'name': 'New York Times',
+        'headquartersGeoLocation': {
+            "latitude": 48.8929012,
+            "longitude": 2.2480131
+        }
     }
 }, 0, 'POST')
 
@@ -55,7 +67,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt-company')),
     'schema': {
-        'name': 'The New York Times Company'
+        'name': 'The New York Times Company',
+        'headquartersGeoLocation': {
+            "latitude": 48.8929012,
+            "longitude": 2.2480131
+        }
     }
 }, 0, 'POST')
 
@@ -63,7 +79,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'guardian')),
     'schema': {
-        'name': 'The Guardian International'
+        'name': 'The Guardian',
+        'headquartersGeoLocation': {
+            "latitude": 51.5349539,
+            "longitude": -0.1216748
+        }
     }
 }, 0, 'POST')
 
@@ -71,7 +91,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'wsj')),
     'schema': {
-        'name': 'Wallstreet Journal'
+        'name': 'Wall Street Journal',
+        'headquartersGeoLocation': {
+            "latitude": 40.7574323,
+            "longitude": -73.9827028
+        }
     }
 }, 0, 'POST')
 
@@ -79,7 +103,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'cnn')),
     'schema': {
-        'name': 'CNN'
+        'name': 'CNN',
+        'headquartersGeoLocation': {
+            "latitude": 33.757934,
+            "longitude": 84.394811
+        }
     }
 }, 0, 'POST')
 
@@ -87,7 +115,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'fn')),
     'schema': {
-        'name': 'Fox News'
+        'name': 'Fox News',
+        'headquartersGeoLocation': {
+            "latitude": 40.758678,
+            "longitude": -73.9824059
+        }
     }
 }, 0, 'POST')
 
@@ -95,7 +127,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'econ')),
     'schema': {
-        'name': 'The Economist'
+        'name': 'The Economist',
+        'headquartersGeoLocation': {
+            "latitude": 51.5046127, 
+            "longitude": -0.0236484
+        }
     }
 }, 0, 'POST')
 
@@ -103,7 +139,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'newyorker')),
     'schema': {
-        'name': 'New Yorker'
+        'name': 'New Yorker',
+        'headquartersGeoLocation': {
+            "latitude": 40.7127431, 
+            "longitude": -74.0133795
+        }
     }
 }, 0, 'POST')
 
@@ -111,7 +151,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'wired')),
     'schema': {
-        'name': 'Wired'
+        'name': 'Wired',
+        'headquartersGeoLocation': {
+            "latitude": 37.7808297,
+            "longitude": -122.3958169
+        }
     }
 }, 0, 'POST')
 
@@ -119,7 +163,11 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'vogue')),
     'schema': {
-        'name': 'Vogue'
+        'name': 'Vogue',
+        'headquartersGeoLocation': {
+            "latitude": 40.751537, 
+            "longitude": -73.986259
+        }
     }
 }, 0, 'POST')
 
@@ -127,7 +175,10 @@ WEAVIATE.runREST('/v1/things', {
     'class': 'Publication',
     'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'gi')),
     'schema': {
-        'name': 'Game Informer'
+        'name': 'Game Informer',
+        'headquartersGeoLocation': {
+            "latitude": 44.9901912,
+            "longitude": -93.2753822}
     }
 }, 0, 'POST')
 
@@ -246,6 +297,9 @@ WEAVIATE.runREST('/v1/things', {
     }
 }, 0, 'POST')
 
+# sleep for slower machines
+time.sleep(4)
+
 ##
 # Import the authors without refs
 ##
@@ -289,6 +343,9 @@ for author, publication in authors.items():
     i += 1
 
 CLIENT.create_things_in_batch(batch)
+
+# sleep for slower machines
+time.sleep(4)
 
 ##
 # Import the articles without refs
@@ -360,5 +417,12 @@ for filename in os.listdir(CACHEDIR):
                         batchRefs.add_reference("Author", str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author))), "wroteArticles", str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])))
         i += 1
 
+# sleep for slower machines
+time.sleep(4)
+
 CLIENT.create_things_in_batch(batchThings)
+
+# sleep for slower machines
+time.sleep(4)
+
 CLIENT.add_references_in_batch(batchRefs)

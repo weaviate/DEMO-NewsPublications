@@ -1,8 +1,12 @@
 #!/bin/bash
 
 # when using with Docker compose we need to sleep
-echo "Sleeping to make sure all services are up and running"
-sleep 16
+echo "Wait for server to come live"
+while [ "$RESPONSE" != "200" ]; do
+    RESPONSE=$(curl --write-out %{http_code} --silent --output /dev/null $1/v1/meta)
+    echo $RESPONSE
+    sleep 3
+done
 
 # Inform
 echo "Importing $1"
