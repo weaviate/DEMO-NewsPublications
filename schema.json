@@ -139,9 +139,16 @@
                         "dataType": [
                             "Category"
                         ],
-                        "description": "category this article is off",
+                        "description": "category this article is of",
                         "name": "ofCategory",
                         "cardinality": "atMostOne"
+                    },
+                    {
+                        "dataType": [
+                            "boolean"
+                        ],
+                        "description": "whether the article is currently accessible through the url",
+                        "name": "isAccessible"
                     }
                 ]
             },
