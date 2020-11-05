@@ -35,6 +35,8 @@ def dateToIso(i):
         isoDate = article.publish_date.isoformat()
     except:
         return isoDate
+    
+    return isoDate
 
 # download nltk english 
 # nltk.download()
