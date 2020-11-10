@@ -8,11 +8,7 @@ RUN apk add --no-cache build-base python-dev python3 py3-pillow py3-lxml g++ mak
 
 ENV LIBRARY_PATH=/lib:/usr/lib
 
-RUN cd /root && \
-    git clone --depth=1 https://github.com/semi-technologies/weaviate-cli && \
-    cd weaviate-cli && \
-    pip3 install -r requirements.txt && \
-    ln -s $(pwd)/bin/weaviate-cli /usr/local/bin/weaviate-cli
+RUN pip3 install weaviate-cli
 
 RUN mkdir -p /root/DEMO-NewsPublications && \
     cd /root/DEMO-NewsPublications

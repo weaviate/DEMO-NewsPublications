@@ -1,0 +1,37 @@
+# start environment
+# download nltk
+# download newspapers
+# create docker
+# execute import
+# check get thing
+# push docker on success
+
+
+sudo: required
+language: python
+cache: pip
+python:
+  - "3.8.1"
+services:
+  - docker
+
+env:
+  - weaviate_host="http://localhost:8080"
+  - DOCKER_COMPOSE_VERSION=1.4.2
+
+before_install:
+  - ./downloadNltk.py
+  - ./download.py ft & ./download.py nyt & ./download.py guardian & ./download.py wsj & ./download.py cnn & ./download.py fn & ./download.py econ & ./download.py newyorker & ./download.py wired & ./download.py vogue & ./download.py gi &
+  - ls ./cache
+  - echo 
+  - docker build . --tag="semitechnologies/weaviate-demo-newspublications:latest" --no-cache
+  - docker-compose up
+
+install:
+  - pip install -r requirements.txt
+
+script:
+  - python test/test_data.py
+
+after_success:
+  - docker push semitechnologies/weaviate-demo-newspublications:latest

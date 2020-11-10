@@ -76,7 +76,7 @@ for articleRaw in newspaper.build(NEWSPAPERS[sys.argv[1]], memoize_articles=Fals
                     'paragraphs': article.text.split("\n\n"),
                     'authors': article.authors,
                     'keywords': article.keywords,
-                    'pubDate': dateToIso(article),
+                    'pubDate': dateToIso(article.publish_date),
                     'publicationId': str(uuid.uuid3(uuid.NAMESPACE_DNS, sys.argv[1]))
                 }
 

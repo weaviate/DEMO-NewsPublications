@@ -335,14 +335,14 @@ for author, publication in authors.items():
 
         # add every 200
         if (i % 199) == 0:
-            CLIENT.create_things_in_batch(batch)
+            CLIENT.batch.create_things(batch)
             batch = weaviate.ThingsBatchRequest()
 
         batch.add_thing(authorObj, 'Author', str(uuid.uuid3(uuid.NAMESPACE_DNS, author)))
         
     i += 1
 
-CLIENT.create_things_in_batch(batch)
+CLIENT.batch.create_things(batch)
 
 # sleep for slower machines
 time.sleep(4)
@@ -362,9 +362,9 @@ for filename in os.listdir(CACHEDIR):
 
             # add every 200
             if (i % 199) == 0:
-                CLIENT.create_things_in_batch(batchThings)
+                CLIENT.batch.create_things(batchThings)
                 batchThings = weaviate.ThingsBatchRequest()
-                CLIENT.add_references_in_batch(batchRefs)
+                CLIENT.batch.add_references(batchRefs)
                 batchRefs = weaviate.ReferenceBatchRequest()
 
             obj = json.load(f)
@@ -374,7 +374,7 @@ for filename in os.listdir(CACHEDIR):
                 if len(processInput('Author', author).split(' ')) == 2:
                     authors.append({
                         'beacon': 'weaviate://localhost/things/' + str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author)))
-                    })
+                    })git
                 else:
                     authors.append({
                         'beacon': 'weaviate://localhost/things/' + obj['publicationId']
@@ -403,26 +403,27 @@ for filename in os.listdir(CACHEDIR):
                 validator.append(articleId)
 
                 # set date
+
                 if obj['pubDate'] != None and obj['pubDate'] != '':
                     articleObj['publicationDate'] = obj['pubDate']
 
                 # add to weaviate
                 batchThings.add_thing(articleObj, "Article", articleId)
-                batchRefs.add_reference("Publication", obj['publicationId'], "hasArticles", articleId)
+                batchRefs.add_reference(obj['publicationId'], "Publication", "hasArticles", articleId)
 
                 # update author to include this article
                 for author in obj['authors']:
                     # check if relation should be through author or publication
                     if len(processInput('Author', author).split(' ')) == 2:
-                        batchRefs.add_reference("Author", str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author))), "wroteArticles", str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])))
+                        batchRefs.add_reference(str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author))), "Author", "wroteArticles", str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])))
         i += 1
 
 # sleep for slower machines
 time.sleep(4)
 
-CLIENT.create_things_in_batch(batchThings)
+CLIENT.batch.create_things(batchThings)
 
 # sleep for slower machines
 time.sleep(4)
 
-CLIENT.add_references_in_batch(batchRefs)
+CLIENT.batch.add_references(batchRefs)
