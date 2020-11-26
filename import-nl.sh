@@ -18,4 +18,4 @@ echo '{"url": "'$1'", "auth": null}' > /root/DEMO-NewsPublications/config.json
 weaviate-cli --config-file /root/DEMO-NewsPublications/config.json schema import /root/DEMO-NewsPublications/schema.json
 
 # import into Weaviate
-/root/DEMO-NewsPublications/import-nl.py $1 '/root/DEMO-NewsPublications/cache-nl'
+/root/DEMO-NewsPublications/import.py $1 '/root/DEMO-NewsPublications/cache-nl'

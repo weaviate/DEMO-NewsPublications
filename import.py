@@ -1,428 +1,305 @@
-#!/usr/bin/env python3
-import newspaper, uuid, os, json, sys, time, weaviate, time
-from modules.Weaviate import Weaviate
-from modules.Weaviate import getWeaviateUrlFromConfigFile
+# Import necessary libraries
+# buildin
+import os
+import sys
+import json
+import uuid
+# installed
+import weaviate
+from weaviate.tools import Batcher
+from weaviate import SEMANTIC_TYPE_THINGS
 
-WEAVIATE = Weaviate(sys.argv[1])
-CACHEDIR = sys.argv[2]
-CLIENT = weaviate.Client(sys.argv[1])
 
-##
-# Function to clean up data
-##
-def processInput(k, v):
+def upload_data_to_weaviate(
+        client: weaviate.Client,
+        data_dir: str,
+        batch_size:int = 200
+    ) -> None:
+    """
+    Upload data to weaviate.
 
-    if k == 'Author':
-        v = v.replace(' Wsj.Com', '')
-        v = v.replace('.', ' ')
-        return v
-    elif k == 'Summary':
-        v = v.replace('\n', ' ')
-        return v
+    Parameters
+    ----------
+    client: weaviate.Client
+        Weaviate client.
+    data_dir: str
+        Directory with the data files to read in.
+    batch_size:int = 200
+        Number of objects to upload at once to weaviate.
 
-    return v
+    Returns
+    -------
+    None
+    """
 
-##
-# Import the publications without refs except for cities
-## 
-print('add publications')
+    batcher = Batcher(
+        client=client, 
+        batch_size=batch_size,
+    )
+    ##### ADD CATEGORIES #####
+    if data_dir.endswith("-nl"):
+        for filename in os.listdir(data_dir + '/categories'):
+            # Use only JSON file formats.
+            if filename.endswith(".json"): 
+                with open(data_dir + '/categories/' + filename) as file_:
+                    object_data = json.load(file_)
+                    batcher.add_data_object(
+                        data_object=object_data["schema"],
+                        class_name=object_data["class"],
+                        uuid=object_data["id"]
+                    )
+    ##### ADD PUBLICATIONS #####
+    for filename in os.listdir(data_dir + '/publications'):
+        # Use only JSON file formats.
+        if filename.endswith(".json"): 
+            with open(data_dir + '/publications/' + filename) as file_:
+                object_data = json.load(file_)
+                batcher.add_data_object(
+                        data_object=object_data["schema"],
+                        class_name=object_data["class"],
+                        uuid=object_data["id"]
+                    )
+    validator = []
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'ft')),
-    'schema': {
-        'name': 'Financial Times',
-        'headquartersGeoLocation': {
-            "latitude": 51.5127391, 
-            "longitude": -0.0962234
-        }
-    }
-}, 0, 'POST')
+    for filename in os.listdir(data_dir):
+        # Use only JSON file formats.
+        if filename.endswith(".json"): 
+            file_ = open(data_dir + '/' + filename)
+            object_data = json.load(file_)
+            article_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, object_data['title']))
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt')),
-    'schema': {
-        'name': 'International New York Times',
-        'headquartersGeoLocation': {
-            "latitude": 51.5127391,
-            "longitude": -0.0962234
-        }
-    }
-}, 0, 'POST')
+            ##### ADD AUTHORS #####
+            authors = add_authors_and_article_ref(
+                object_data=object_data,
+                article_id=article_id,
+                batcher=batcher
+            )
+            ##### ADD ARTICLES #####
+            validator = add_articles_and_publication_ref(
+                object_data=object_data,
+                article_id=article_id,
+                batcher=batcher,
+                authors=authors,
+                validator=validator
+            )
+            file_.close()
+    batcher.close()
+         
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt-small')),
-    'schema': {
-        'name': 'New York Times',
-        'headquartersGeoLocation': {
-            "latitude": 48.8929012,
-            "longitude": 2.2480131
-        }
-    }
-}, 0, 'POST')
+def add_authors_and_article_ref(
+        object_data: dict,
+        article_id: str,
+        batcher: Batcher
+    ) -> list:
+    """
+    Add authors and the respective reference to the article they wrote to weaviate.
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'nyt-company')),
-    'schema': {
-        'name': 'The New York Times Company',
-        'headquartersGeoLocation': {
-            "latitude": 48.8929012,
-            "longitude": 2.2480131
-        }
-    }
-}, 0, 'POST')
+    Parameters
+    ----------
+    object_data: dict
+        Data of an article represented as a dictionary that contains the authors to add.
+    article_id: str
+        ID of the article that authors (that need to be added) wrote.
+    batcher: Batcher
+        A batcher object used to send data to weaviate in batches.
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'guardian')),
-    'schema': {
-        'name': 'The Guardian',
-        'headquartersGeoLocation': {
-            "latitude": 51.5349539,
-            "longitude": -0.1216748
-        }
-    }
-}, 0, 'POST')
+    Returns
+    -------
+    list
+        Returns a list of processed authors names.
+    """
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'wsj')),
-    'schema': {
-        'name': 'Wall Street Journal',
-        'headquartersGeoLocation': {
-            "latitude": 40.7574323,
-            "longitude": -73.9827028
-        }
-    }
-}, 0, 'POST')
+    authors = []
+    for author in object_data['authors']:
+        # check if relation should be through author or publication
+        author = process_input('Author', author)
+        if len(author.split(' ')) == 2:
+            author_uuid = str(uuid.uuid3(uuid.NAMESPACE_DNS, author))
+            batcher.add_data_object(
+                data_object=create_author_object(author, object_data['publicationId']),
+                class_name='Author',
+                uuid=author_uuid,
+            )
+            batcher.add_reference(
+                from_semantic_type=SEMANTIC_TYPE_THINGS,
+                from_thing_class_name="Author",
+                from_thing_uuid=author_uuid,
+                from_property_name="wroteArticles",
+                to_semantic_type=SEMANTIC_TYPE_THINGS,
+                to_thing_uuid=article_id
+            )
+            authors.append({
+                'beacon': 'weaviate://localhost/things/' + \
+                    str(uuid.uuid3(uuid.NAMESPACE_DNS, author))
+            })
+        else:
+            authors.append({
+                'beacon': 'weaviate://localhost/things/' + object_data['publicationId']
+            })
+    return authors
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'cnn')),
-    'schema': {
-        'name': 'CNN',
-        'headquartersGeoLocation': {
-            "latitude": 33.757934,
-            "longitude": 84.394811
-        }
-    }
-}, 0, 'POST')
+def add_articles_and_publication_ref(
+        object_data: dict,
+        article_id: str,
+        batcher: Batcher,
+        authors: list,
+        validator: list
+    ) -> list:
+    """
+    Add authors and the respective reference to the article they wrote to weaviate.
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'fn')),
-    'schema': {
-        'name': 'Fox News',
-        'headquartersGeoLocation': {
-            "latitude": 40.758678,
-            "longitude": -73.9824059
-        }
-    }
-}, 0, 'POST')
+    Parameters
+    ----------
+    object_data: dict
+        Data of an article represented as a dictionary that contains the authors to add.
+    article_id: str
+        ID of the article that authors (that need to be added) wrote.
+    batcher: Batcher
+        A batcher object used to send data to weaviate in batches.
+    authors:
+        Authors of the article.
+    validator: list
+        A list of article ID that has been aready added to weaviate.
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'econ')),
-    'schema': {
-        'name': 'The Economist',
-        'headquartersGeoLocation': {
-            "latitude": 51.5046127, 
-            "longitude": -0.0236484
-        }
-    }
-}, 0, 'POST')
+    Returns
+    -------
+    list
+        Returns an updated validator list.
+    """
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'newyorker')),
-    'schema': {
-        'name': 'New Yorker',
-        'headquartersGeoLocation': {
-            "latitude": 40.7127431, 
-            "longitude": -74.0133795
-        }
-    }
-}, 0, 'POST')
+    if article_id not in validator:
+        validator.append(article_id)
+        word_count = len(' '.join(object_data['paragraphs']).split(' '))
+        article_object = create_article_object(
+            object_data=object_data,
+            authors=authors,
+            word_count=word_count
+        )
+        # Set publication date
+        if object_data['pubDate'] is not None and object_data['pubDate'] != '':
+            article_object['publicationDate'] = object_data['pubDate']
+        # Add article to weaviate
+        batcher.add_data_object(article_object, "Article", article_id)
+        # Add reference to weaviate
+        batcher.add_reference(
+            from_semantic_type=SEMANTIC_TYPE_THINGS,
+            from_thing_class_name="Publication",
+            from_thing_uuid=object_data['publicationId'],
+            from_property_name="hasArticles",
+            to_semantic_type=SEMANTIC_TYPE_THINGS,
+            to_thing_uuid=article_id
+        )
+    return validator
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'wired')),
-    'schema': {
-        'name': 'Wired',
-        'headquartersGeoLocation': {
-            "latitude": 37.7808297,
-            "longitude": -122.3958169
-        }
-    }
-}, 0, 'POST')
+def create_author_object(
+        author: str,
+        publication_id: str,
+    ) -> dict:
+    """
+    Create author object, as a dictionary, to upload to weaviate.
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'vogue')),
-    'schema': {
-        'name': 'Vogue',
-        'headquartersGeoLocation': {
-            "latitude": 40.751537, 
-            "longitude": -73.986259
-        }
-    }
-}, 0, 'POST')
+    Parameters
+    ----------
+    author: str
+        Author name.
+    publication_id: str
+        Publication ID that the author wrote.
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Publication',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'gi')),
-    'schema': {
-        'name': 'Game Informer',
-        'headquartersGeoLocation': {
-            "latitude": 44.9901912,
-            "longitude": -93.2753822}
-    }
-}, 0, 'POST')
+    Returns
+    -------
+    dict
+        Dictionary object to upload to weaviate.
+    """
 
-##
-# Add categories
-##
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Art')),
-    'schema': {
-        'name': 'Art'
-    }
-}, 0, 'POST')
 
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Music')),
-    'schema': {
-        'name': 'Music'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Movies')),
-    'schema': {
-        'name': 'Movies'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Environmental')),
-    'schema': {
-        'name': 'Environmental'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Recreation')),
-    'schema': {
-        'name': 'Recreation'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Weather')),
-    'schema': {
-        'name': 'Weather'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Technology')),
-    'schema': {
-        'name': 'Technology'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Science')),
-    'schema': {
-        'name': 'Science'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Sports')),
-    'schema': {
-        'name': 'Sports'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Religion')),
-    'schema': {
-        'name': 'Religion'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Politics')),
-    'schema': {
-        'name': 'Politics'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Media')),
-    'schema': {
-        'name': 'Media'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Government')),
-    'schema': {
-        'name': 'Government'
-    }
-}, 0, 'POST')
-
-WEAVIATE.runREST('/v1/things', {
-    'class': 'Category',
-    'id': str(uuid.uuid3(uuid.NAMESPACE_DNS, 'Business')),
-    'schema': {
-        'name': 'Business'
-    }
-}, 0, 'POST')
-
-# sleep for slower machines
-time.sleep(4)
-
-##
-# Import the authors without refs
-##
-print('add authors')
-
-authors = {}
-for filename in os.listdir(CACHEDIR):
-    if filename.endswith(".json"):
-        with open(CACHEDIR + '/' + filename) as f:
-            obj = json.load(f)
-            for author in obj['authors']:
-                authors[processInput('Author', author)] = obj['publicationId']
-
-# add to weaviate
-i = 1
-batch = weaviate.ThingsBatchRequest()
-for author, publication in authors.items():
-
-    # empty author object
-    authorObj = {}
-
-    if len(author.split(' ')) == 2:
-
-        # author obj
-        authorObj = {
-            'name': author,
-            'writesFor': [
-                {
-                    'beacon': 'weaviate://localhost/things/' + publication
-                }
-            ]
-        }
-
-        # add every 200
-        if (i % 199) == 0:
-            CLIENT.create_things_in_batch(batch)
-            batch = weaviate.ThingsBatchRequest()
-
-        batch.add_thing(authorObj, 'Author', str(uuid.uuid3(uuid.NAMESPACE_DNS, author)))
-        
-    i += 1
-
-CLIENT.create_things_in_batch(batch)
-
-# sleep for slower machines
-time.sleep(4)
-
-##
-# Import the articles without refs
-##
-print('add articles')
-i = 1
-articles = {}
-validator = []
-batchThings = weaviate.ThingsBatchRequest()
-batchRefs = weaviate.ReferenceBatchRequest()
-for filename in os.listdir(CACHEDIR):
-    if filename.endswith(".json"):
-        with open(CACHEDIR + '/' + filename) as f:
-
-            # add every 200
-            if (i % 199) == 0:
-                CLIENT.create_things_in_batch(batchThings)
-                batchThings = weaviate.ThingsBatchRequest()
-                CLIENT.add_references_in_batch(batchRefs)
-                batchRefs = weaviate.ReferenceBatchRequest()
-
-            obj = json.load(f)
-            authors = []
-            for author in obj['authors']:
-                # check if relation should be through author or publication
-                if len(processInput('Author', author).split(' ')) == 2:
-                    authors.append({
-                        'beacon': 'weaviate://localhost/things/' + str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author)))
-                    })
-                else:
-                    authors.append({
-                        'beacon': 'weaviate://localhost/things/' + obj['publicationId']
-                    })
-
-            wordCount = 0
-            for paragraph in obj['paragraphs']:
-                wordCount += len(paragraph.split(' '))
-
-            articleId = str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title']))
-            articleObj = {
-                'title': obj['title'],
-                'summary': processInput('Summary', obj['summary']),
-                'hasAuthors': authors,
-                'wordCount': wordCount,
-                'url': obj['url'],
-                'inPublication': [
-                    {
-                        'beacon': 'weaviate://localhost/things/' + obj['publicationId']
-                    }
-                ]
+    return {
+        'name': author,
+        'writesFor': [
+            {
+                'beacon': 'weaviate://localhost/things/' + publication_id
             }
+        ]
+    }
 
-            if articleId not in validator:
 
-                validator.append(articleId)
+def create_article_object(
+        object_data: dict,
+        authors: list,
+        word_count: int
+    ) -> dict:
+    """
+    Create article object, as a dictionary, to upload to weaviate.
 
-                # set date
-                if obj['pubDate'] != None and obj['pubDate'] != '':
-                    articleObj['publicationDate'] = obj['pubDate']
+    Parameters
+    ----------
+    object_data: dict
+        A dictionary containing all the information about the article.
+    authors: list
+        A list of authors that wrote this article.
+    word_count: int
+        How many words are in the article.
 
-                # add to weaviate
-                batchThings.add_thing(articleObj, "Article", articleId)
-                batchRefs.add_reference("Publication", obj['publicationId'], "hasArticles", articleId)
+    Returns
+    -------
+    dict
+        Dictionary object to upload to weaviate.
+    """
 
-                # update author to include this article
-                for author in obj['authors']:
-                    # check if relation should be through author or publication
-                    if len(processInput('Author', author).split(' ')) == 2:
-                        batchRefs.add_reference("Author", str(uuid.uuid3(uuid.NAMESPACE_DNS, processInput('Author', author))), "wroteArticles", str(uuid.uuid3(uuid.NAMESPACE_DNS, obj['title'])))
-        i += 1
 
-# sleep for slower machines
-time.sleep(4)
+    return {
+        'title': object_data['title'],
+        'summary': process_input('Summary', object_data['summary']),
+        'hasAuthors': authors,
+        'wordCount': word_count,
+        'url': object_data['url'],
+        'inPublication': [
+            {
+                'beacon': 'weaviate://localhost/things/' + object_data['publicationId']
+            }
+        ]
+    }
 
-CLIENT.create_things_in_batch(batchThings)
 
-# sleep for slower machines
-time.sleep(4)
+def process_input(
+        class_name: str,
+        value: str,
+    ) -> str:
+    """
+    Clean up the data.
 
-CLIENT.add_references_in_batch(batchRefs)
+    Parameters
+    ----------
+    class_name: str
+        Which class the object(see value) to clean belongs to.
+    value: str
+        The object to clean.
+
+    Returns
+    -------
+    str
+        Cleaned object.
+    """
+
+
+    if class_name == 'Author':
+        value = value.replace(' Wsj.Com', '')
+        value = value.replace('.', ' ')
+    elif class_name == 'Summary':
+        value = value.replace('\n', ' ')
+    return value
+
+
+if __name__ == "__main__":
+
+    if len(sys.argv) == 4:
+        upload_data_to_weaviate(
+            client=weaviate.Client(sys.argv[1]),
+            data_dir=sys.argv[2],
+            batch_size=int(sys.argv[3])
+        )
+    else:
+        upload_data_to_weaviate(
+            client=weaviate.Client(sys.argv[1]),
+            data_dir=sys.argv[2],
+            batch_size=200
+        )
