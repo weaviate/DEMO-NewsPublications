@@ -8,15 +8,15 @@ while [ "$RESPONSE" != "200" ]; do
     sleep 3
 done
 
+
 # Inform
 echo "Importing $1"
 
-# Init the CLI tool
-weaviate-cli init --email=noreply@semi.technology --url=$1
+# make weaviate cli config file
+echo '{"url": "'$1'", "auth": null}' > /root/DEMO-NewsPublications/config.json
 
 # import the schema
-weaviate-cli schema-truncate --force
-weaviate-cli schema-import --location=/root/DEMO-NewsPublications/schema.json
+weaviate-cli --config-file /root/DEMO-NewsPublications/config.json schema import /root/DEMO-NewsPublications/schema.json
 
 # import into Weaviate
 /root/DEMO-NewsPublications/import.py $1 '/root/DEMO-NewsPublications/cache'
