@@ -1,4 +1,5 @@
 #!/bin/bash
+# Usage: ./import.sh <WEAVIATE_URL> <CACHE_DIR> [BATCH_SIZE]
 
 # when using with Docker compose we need to sleep
 echo "Wait for server to come live"
@@ -10,13 +11,24 @@ done
 
 # Inform
 echo "Importing $1"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# Init the CLI tool
-weaviate-cli init --email=noreply@semi.technology --url=$1
+# make weaviate cli config file
+echo '{"url": "'$1'", "auth": null}' > $DIR/config.json
 
 # import the schema
-weaviate-cli schema-truncate --force
-weaviate-cli schema-import --location=/root/DEMO-NewsPublications/schema.json
+weaviate-cli --config-file $DIR/config.json schema import $DIR/schema.json
 
 # import into Weaviate
-/root/DEMO-NewsPublications/import.py $1 '/root/DEMO-NewsPublications/cache'
+if [[ $# -eq 2 ]]
+then
+    echo "Import data into weaviate with default batch size (200)"
+    $DIR/import.py $1 "$DIR/$2"
+elif [[ $# -eq 3 ]]
+then
+    echo "Import data into weaviate with batch size $3"
+    $DIR/import.py $1 "$DIR/$2" $3
+else
+    echo "ERROR, Wrong number of arguments!"
+    exit 1
+fi

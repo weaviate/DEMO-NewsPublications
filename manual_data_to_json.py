@@ -411,11 +411,11 @@ publications_nl = [
     }
 ]
 for cat in categories:
-    with open(f'./cache/categories/{cat["id"]}.json', 'w') as f:
+    with open(f'./cache-en/categories/{cat["id"]}.json', 'w') as f:
         json.dump(cat, f)
         
 for pub in publications:
-    with open(f'./cache/publications/{pub["id"]}.json', 'w') as f:
+    with open(f'./cache-en/publications/{pub["id"]}.json', 'w') as f:
         json.dump(pub, f)
 
 for pub_nl in publications_nl:
