@@ -1,2 +1,4 @@
 .DS_Store
 docker-compose.yaml
+.idea
+__pycache__
