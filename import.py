@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 # Import necessary libraries
 # buildin
 import os
 import sys
 import json
 import uuid
+from time import sleep
 # installed
 import weaviate
 from weaviate.tools import Batcher
@@ -36,8 +38,9 @@ def upload_data_to_weaviate(
         client=client, 
         batch_size=batch_size,
     )
-    ##### ADD CATEGORIES #####
-    if data_dir.endswith("-nl"):
+    
+    if not data_dir.endswith("-nl"):
+        ##### ADD CATEGORIES #####
         for filename in os.listdir(data_dir + '/categories'):
             # Use only JSON file formats.
             if filename.endswith(".json"): 
@@ -47,7 +50,7 @@ def upload_data_to_weaviate(
                         data_object=object_data["schema"],
                         class_name=object_data["class"],
                         uuid=object_data["id"]
-                    )
+                    )   
     ##### ADD PUBLICATIONS #####
     for filename in os.listdir(data_dir + '/publications'):
         # Use only JSON file formats.
@@ -59,6 +62,8 @@ def upload_data_to_weaviate(
                         class_name=object_data["class"],
                         uuid=object_data["id"]
                     )
+    batcher.update_batches()
+    sleep(3)
     validator = []
 
     for filename in os.listdir(data_dir):
@@ -291,6 +296,7 @@ def process_input(
 
 if __name__ == "__main__":
 
+    print(f"Importing data from: {sys.argv[2]}")
     if len(sys.argv) == 4:
         upload_data_to_weaviate(
             client=weaviate.Client(sys.argv[1]),
