@@ -4,23 +4,50 @@
 import os
 import sys
 import json
+import time
+from typing import Callable
 # installed
 import weaviate
 from weaviate.tools import Batcher
-import time
 from load.data import Loader
 
 
-def batcher_callback(results):
-    for r in results:
-        result = r['result']
-        if result.get('status', 'SUCCESS') != 'SUCCESS':
-            print(r)
-        if 'error' in result:
-            print(r)
+def batcher_callback(
+        results: list
+    ) -> None:
+    """
+    Print error message that comes from the batcher update.
+
+    Parameters
+    ----------
+    results : list
+        A list of result for object that were uploaded to weaviate using the batcher.
+    """
 
 
-def iterate_json(path: str, callback):
+    for result in results:
+        if result['result'].get('status', 'SUCCESS') != 'SUCCESS':
+            print(result)
+        if 'error' in result['result']:
+            print(result)
+
+
+def iterate_json(
+        path: str,
+        callback: Callable[[dict], None]
+    ) -> None:
+    """
+    Parse cached files and apply a function to each of them.
+
+    Parameters
+    ----------
+    path : str
+        Cache directory to read files from (only JSON format files supported at the moment).
+    callback : Callable[[dict], None]
+        The callback function used on each JSON file.
+        Ex.: Can be a function that adds to weaviated, or deletes.
+    """
+
     for filename in os.listdir(path):
         # Use only JSON file formats.
         if filename.endswith(".json"):
@@ -53,7 +80,7 @@ def upload_data_to_weaviate(
     """
 
     with Batcher(
-        client=client, 
+        client=client,
         batch_size=batch_size,
         return_values_callback=batcher_callback
     ) as batcher:
@@ -64,31 +91,43 @@ def upload_data_to_weaviate(
             iterate_json(data_dir + '/categories', loader.load_category)
 
         ##### ADD PUBLICATIONS #####
-        iterate_json(data_dir + '/publications', loader.load_publications)
+        iterate_json(data_dir + '/publications', loader.load_publication)
 
-        iterate_json(data_dir, loader.load_authors_articles)
-         
+        ##### ADD AUTHORS AND ARTICLES #####
+        iterate_json(data_dir, loader.load_authors_article)
+
+def print_usage():
+    """
+    Print command-line interface description.
+    """
+
+    print("Usage: ./import.py <WEAVIATE_URL> <CACHE_DIR> [BATCH_SIZE]")
 
 if __name__ == "__main__":
-    client = weaviate.Client(sys.argv[1])
-    while not client.is_ready():
-        print("wait for weaviate to get ready.")
+    nr_argv = len(sys.argv)
+    if nr_argv not in (3, 4):
+        print(f"ERROR: Too many arguments, given {nr_argv} but must be 3 or 4.")
+        print_usage()
+        sys.exit(1)
+    main_client = weaviate.Client(sys.argv[1])
+    while not main_client.is_ready():
+        print("Wait for weaviate to get ready.")
         time.sleep(2.0)
-    if not client.schema.contains():
+    if not main_client.schema.contains():
         dir_path = os.path.dirname(os.path.realpath(__file__))
         schema_file = os.path.join(dir_path, "schema.json")
-        client.schema.create(schema_file)
+        main_client.schema.create(schema_file)
 
     print(f"Importing data from: {sys.argv[2]}")
-    if len(sys.argv) == 4:
+    if nr_argv == 4:
         upload_data_to_weaviate(
-            client=client,
+            client=main_client,
             data_dir=sys.argv[2],
             batch_size=int(sys.argv[3])
         )
     else:
         upload_data_to_weaviate(
-            client=client,
+            client=main_client,
             data_dir=sys.argv[2],
             batch_size=200
         )

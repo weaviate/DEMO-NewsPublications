@@ -1,38 +1,95 @@
-import weaviate.tools
+"""
+A Loader class to import data into weaviate.
+"""
 import uuid
+from typing import Optional
+import weaviate.tools
 
 
-def generate_uuid(key):
+def generate_uuid(
+        key: str
+    ) -> str:
+    """
+    Generate an universally unique identifier (uuid).
+
+    Parameters
+    ----------
+    key : str
+        The key used to generate the uuid.
+
+    Returns
+    -------
+    str
+        Universally unique identifier (uuid) as string.
+    """
+
     return str(uuid.uuid3(uuid.NAMESPACE_DNS, key))
 
 
 class Loader:
+    """
+    A Loader class that uploads Newespaper Articles, Publications, Categories and Authors.
+    It makes use of the weaviate.tools.Batcher to upload data in batches.
+    """
 
     def __init__(self, batcher:weaviate.tools.Batcher):
         self.batcher = batcher
         self.loaded_articles = []
 
-    def load_category(self, data):
+    def load_category(self,
+            data: dict
+        ) -> None:
+        """
+        Load catogory into weaviate.
+
+        Parameters
+        ----------
+        data : dict
+            Category as a dictionary.
+        """
+
         self.batcher.add_data_object(
             data_object=data["schema"],
             class_name=data["class"],
             uuid=data["id"]
         )
 
-    def load_publications(self, data):
+    def load_publication(self,
+            data: dict
+        ) -> None:
+        """
+        Load Publication into weaviate.
+
+        Parameters
+        ----------
+        data : dict
+            Publication as a dictionary.
+        """
+
         self.batcher.add_data_object(
             data_object=data["schema"],
             class_name=data["class"],
             uuid=data["id"]
         )
 
-    def load_authors_articles(self, data):
+    def load_authors_article(self,
+            data: dict
+        ) -> None:
+        """
+        Load Authors and Article into weaviate.
+
+        Parameters
+        ----------
+        data : dict
+            Article as a dictionary.
+        """
+
         article_id = generate_uuid(data['title'])
 
         ##### ADD AUTHORS #####
         author_ids = []
         for author in data['authors']:
-            author_id = self.add_authors(author, article_id, data['publicationId'])
+            author_id = self.add_author(author, article_id, data['publicationId'])
             if author_id is not None:
                 author_ids.append(author_id)
             else:
@@ -73,7 +130,22 @@ class Loader:
             )
             self.add_ref_article_authors(author_ids, article_id)
 
-    def add_ref_article_authors(self, author_ids, article_id):
+    def add_ref_article_authors(self,
+            author_ids: list,
+            article_id: str
+        ) -> None:
+        """
+        Add Reference of the Article to the Authors into Batcher
+        to be loaded into weaviate.
+
+        Parameters
+        ----------
+        author_ids : list
+            A list of authors uuids to that worte the Article.
+        article_id : str
+            UUID of the Article.
+        """
+
         for author_id in author_ids:
             self.batcher.add_reference(
                 from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
@@ -84,7 +156,30 @@ class Loader:
                 to_thing_uuid=author_id,
             )
 
-    def add_authors(self, author, article_id, publication_id):
+    def add_author(self,
+            author: str,
+            article_id: str,
+            publication_id: str
+        ) -> Optional[str]:
+        """
+        Add Author into Batcher to be loaded into weaviate.
+
+        Parameters
+        ----------
+        author : str
+            Name of the Author.
+        article_id : str
+            UUID of the Article.
+        publication_id : str
+            UUID of the Publication.
+
+        Returns
+        -------
+        Optional[str]
+            The processed Author name.
+            Only names that consists of two words, otherwise returns None.
+        """
+
         author = process_input('Author', author)
         if len(author.split(' ')) == 2:
             author_uuid = generate_uuid(author)
@@ -109,7 +204,7 @@ class Loader:
                 to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
                 to_thing_uuid=article_id
             )
-            return generate_uuid(author)
+            return author_uuid
         return None
 
 

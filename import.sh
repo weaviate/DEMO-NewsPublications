@@ -17,7 +17,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo '{"url": "'$1'", "auth": null}' > $DIR/config.json
 
 # import the schema
-weaviate-cli --config-file $DIR/config.json schema import $DIR/schema.json
+weaviate-cli --config-file $DIR/config.json schema import $DIR/schema.json --force
 
 # import into Weaviate
 if [[ $# -eq 2 ]]

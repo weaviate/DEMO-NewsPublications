@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-import newspaper as news
-import uuid
+import uuid as uuid_lib
 import os
 import json
 import sys
 from typing import Optional
+import newspaper as news
 
 NEWSPAPERS = {}
 NEWSPAPERS['en'] = {
@@ -41,7 +41,7 @@ NEWSPAPERS['nl'] = {
 
 
 def is_in_cache(
-        uuid: str, 
+        uuid: str,
         cache_path: str
     ) -> bool:
     """
@@ -60,7 +60,6 @@ def is_in_cache(
         True if file is in the directory, False otherwise.
     """
 
-    cache_path
     if os.path.isfile(cache_path + str(uuid) + '.json'):
         return True
     return False
@@ -80,9 +79,8 @@ def save_to_cache(
         Path where to save the newspaper.
     """
 
-    f = open(cache_path + obj['id'] + '.json', 'x')
-    f.write(json.dumps(obj))
-    f.close()
+    with open(cache_path + obj['id'] + '.json', 'x') as file_:
+        file_.write(json.dumps(obj))
     if os.path.getsize(cache_path + obj['id'] + '.json') < 2000: # TODO: WHY 2000?
         os.remove(cache_path + obj['id'] + '.json')
 
@@ -129,20 +127,21 @@ def build_actual_newspaper(
     """
     # Build the actual newspaper
     for article_raw in news.build(NEWSPAPERS[lang][newspaper], memoize_articles=False).articles:
-        article_uuid = uuid.uuid3(uuid.NAMESPACE_DNS, article_raw.url)
-        if is_in_cache(article_uuid, cache_path) == False:
+        article_uuid = uuid_lib.uuid3(uuid_lib.NAMESPACE_DNS, article_raw.url)
+        if not is_in_cache(article_uuid, cache_path):
             try:
                 article = news.Article(article_raw.url)
                 article.download()
                 article.parse()
                 article.nlp()
-                if (article.meta_lang == lang or article.meta_lang == None) and \
+                if (article.meta_lang == lang or article.meta_lang is None) and \
                     article.title != '' and \
-                    article.title != None and \
+                    article.title is not None and \
                     article.summary != '' and \
-                    article.summary != None: # TODO: WHY article.meta_lag can be None too?
+                    article.summary is not None: # TODO: WHY article.meta_lag can be None too?
 
-                    if lang == 'nl' and 'Puzzel' in article.title: # TODO: Should it also skip it for English? 
+                    if lang == 'nl' and 'Puzzel' in article.title:
+                        # TODO: Should it also skip it for English?
                         continue
 
                     # create the cache obj
@@ -155,13 +154,13 @@ def build_actual_newspaper(
                         'authors': article.authors,
                         'keywords': article.keywords,
                         'pubDate': date_to_iso(article),
-                        'publicationId': str(uuid.uuid3(uuid.NAMESPACE_DNS, newspaper))
+                        'publicationId': str(uuid_lib.uuid3(uuid_lib.NAMESPACE_DNS, newspaper))
                     }
                     # save to the cache
                     save_to_cache(cache_object, cache_path)
                     print("Downloaded: " + article.title)
-            except Exception as e:
-                print("Something went wrong: ", e)
+            except Exception as exception:
+                print("Something went wrong: ", exception)
         else:
             print(f"'{newspaper}' collected from cache")
 
@@ -179,29 +178,29 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print(f"ERROR, Wrong number of arguments, given {len(sys.argv) - 1}, must be 2!")
         print_usage()
-        exit(1)
+        sys.exit(1)
     # Check language provided
-    lang = sys.argv[1].lower()
-    if lang not in ['en', 'nl']:
+    lang_ = sys.argv[1].lower()
+    if lang_ not in ['en', 'nl']:
         print("ERROR, Demo does not support this language!")
-        exit(1)
-    cache_path = f'./cache-{lang}/'
+        sys.exit(1)
+    cache_path_ = f'./cache-{lang_}/'
     # which newspaper to load?
     if sys.argv[2] == '-a':
-        for newspaper in NEWSPAPERS[lang].keys():
+        for newspaper_ in NEWSPAPERS[lang_].keys():
             build_actual_newspaper(
-                lang=lang,
-                newspaper=newspaper,
-                cache_path=cache_path
+                lang=lang_,
+                newspaper=newspaper_,
+                cache_path=cache_path_
             )
 
-    elif sys.argv[2] in NEWSPAPERS[lang]:
+    elif sys.argv[2] in NEWSPAPERS[lang_]:
         build_actual_newspaper(
-            lang=lang,
+            lang=lang_,
             newspaper=sys.argv[2],
-            cache_path=cache_path
+            cache_path=cache_path_
         )
     else:
         print("ERROR, Choose a newspaper!")
-        print(json.dumps(NEWSPAPERS[lang], indent=4))
-        exit(1)
+        print(json.dumps(NEWSPAPERS[lang_], indent=4))
+        sys.exit(1)
