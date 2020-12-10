@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Import data into weaviate script.
+"""
 # Import necessary libraries
 # buildin
 import os
@@ -103,7 +106,11 @@ def print_usage():
 
     print("Usage: ./import.py <WEAVIATE_URL> <CACHE_DIR> [BATCH_SIZE]")
 
-if __name__ == "__main__":
+def main():
+    """
+    The main function that is executed when running this script.
+    """
+
     nr_argv = len(sys.argv)
     if nr_argv not in (3, 4):
         print(f"ERROR: Too many arguments, given {nr_argv} but must be 3 or 4.")
@@ -114,7 +121,8 @@ if __name__ == "__main__":
     wait_time_limit = 14
     while not main_client.is_ready():
         if not wait_time_limit:
-            sys.stderr.write(f"\rTIMEOUT: Weaviate not ready. Try again or check if weaviate is running.\n")
+            sys.stderr.write("\rTIMEOUT: Weaviate not ready. \
+                            Try again or check if weaviate is running.\n")
             sys.exit(1)
         sys.stdout.write(f"\rWait for weaviate to get ready. {wait_time_limit:02d} seconds left.")
         sys.stdout.flush()
@@ -139,3 +147,6 @@ if __name__ == "__main__":
             data_dir=sys.argv[2],
             batch_size=200
         )
+
+if __name__ == "__main__":
+    main()

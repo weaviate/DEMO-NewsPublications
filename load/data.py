@@ -35,30 +35,14 @@ class Loader:
     def __init__(self, batcher:weaviate.tools.Batcher):
         self.batcher = batcher
         self.loaded_articles = []
+        self.load_category = self._load_publication_or_category
+        self.load_publication = self._load_publication_or_category
 
-    def load_category(self,
+    def _load_publication_or_category(self,
             data: dict
         ) -> None:
         """
-        Load catogory into weaviate.
-
-        Parameters
-        ----------
-        data : dict
-            Category as a dictionary.
-        """
-
-        self.batcher.add_data_object(
-            data_object=data["schema"],
-            class_name=data["class"],
-            uuid=data["id"]
-        )
-
-    def load_publication(self,
-            data: dict
-        ) -> None:
-        """
-        Load Publication into weaviate.
+        Load Publication or Category into weaviate.
 
         Parameters
         ----------
@@ -81,7 +65,7 @@ class Loader:
         Parameters
         ----------
         data : dict
-            Article as a dictionary.
+            Raw Article data as a dictionary.
         """
 
         article_id = generate_uuid(data['title'])
@@ -97,6 +81,52 @@ class Loader:
                 author_ids.append(data['publicationId'])
 
         ##### ADD ARTICLES #####
+        self.add_article(article_id, data, author_ids)
+
+    def add_ref_article_authors(self,
+            author_ids: list,
+            article_id: str
+        ) -> None:
+        """
+        Add Reference of the Article to the Authors into Batcher
+        to be loaded into weaviate.
+
+        Parameters
+        ----------
+        author_ids : list
+            A list of authors uuids to that worte the Article.
+        article_id : str
+            UUID of the Article.
+        """
+
+        for author_id in author_ids:
+            self.batcher.add_reference(
+                from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
+                from_thing_class_name="Article",
+                from_thing_uuid=article_id,
+                from_property_name="hasAuthors",
+                to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
+                to_thing_uuid=author_id,
+            )
+
+    def add_article(self,
+            article_id: str,
+            data: dict,
+            author_ids: str
+        ) -> None:
+        """
+        Add Article into Batcher to be loaded into weaviate.
+
+        Parameters
+        ----------
+        article_id : str
+            UUID of the Article.
+        data : dict
+            Raw Article data as a dictionary.
+        author_ids : str
+            A list of Authors UUIDs that wrote the article.
+        """
+
         if article_id not in self.loaded_articles:
             self.loaded_articles.append(article_id)
             word_count = len(' '.join(data['paragraphs']).split(' '))
@@ -129,32 +159,6 @@ class Loader:
                 to_thing_uuid=article_id
             )
             self.add_ref_article_authors(author_ids, article_id)
-
-    def add_ref_article_authors(self,
-            author_ids: list,
-            article_id: str
-        ) -> None:
-        """
-        Add Reference of the Article to the Authors into Batcher
-        to be loaded into weaviate.
-
-        Parameters
-        ----------
-        author_ids : list
-            A list of authors uuids to that worte the Article.
-        article_id : str
-            UUID of the Article.
-        """
-
-        for author_id in author_ids:
-            self.batcher.add_reference(
-                from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                from_thing_class_name="Article",
-                from_thing_uuid=article_id,
-                from_property_name="hasAuthors",
-                to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                to_thing_uuid=author_id,
-            )
 
     def add_author(self,
             author: str,
