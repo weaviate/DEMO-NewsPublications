@@ -109,16 +109,24 @@ if __name__ == "__main__":
         print(f"ERROR: Too many arguments, given {nr_argv} but must be 3 or 4.")
         print_usage()
         sys.exit(1)
+
     main_client = weaviate.Client(sys.argv[1])
+    wait_time_limit = 14
     while not main_client.is_ready():
-        print("Wait for weaviate to get ready.")
+        if not wait_time_limit:
+            sys.stderr.write(f"\rTIMEOUT: Weaviate not ready. Try again or check if weaviate is running.\n")
+            sys.exit(1)
+        sys.stdout.write(f"\rWait for weaviate to get ready. {wait_time_limit:02d} seconds left.")
+        sys.stdout.flush()
+        wait_time_limit -= 2
         time.sleep(2.0)
+
     if not main_client.schema.contains():
         dir_path = os.path.dirname(os.path.realpath(__file__))
         schema_file = os.path.join(dir_path, "schema.json")
         main_client.schema.create(schema_file)
 
-    print(f"Importing data from: {sys.argv[2]}")
+    print(f"\nImporting data from: {sys.argv[2]}")
     if nr_argv == 4:
         upload_data_to_weaviate(
             client=main_client,

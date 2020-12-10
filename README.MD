@@ -13,7 +13,7 @@ Make sure to have Python3 and pip3 installed.
 Only if you want to start with a fresh dataset (the cache folder is populated);
 
 1. `$ rm ./cache-en/*.json` for English dataset and `$ rm ./cache-nl/*.json` for Dutch dataset
-2. `$ ./download.py ft <nl | en>  <'newspaper' | -a>`. The `-a` option is for all newspapers implemented. Below is the list of the available newspapers.
+2. `$ python3 download.py ft <nl | en>  <'newspaper' | -a>`. The `-a` option is for all newspapers implemented. Below is the list of the available newspapers.
 
 List of available newspapers.
 1. English:
@@ -48,8 +48,8 @@ List of available newspapers.
 ## Execute the import WITHOUT Docker
 
 1. `$ pip3 install -r requirements.txt`
-2. `$ ./import.sh <WEAVIATE_URL> <CACHE_DIR> [BATCH_SIZE]` (`./import.sh` might need execution permission, for it run `chmod +x ./import.sh`).
-    - e.g.: `$ ./import.sh http://localhost:8080 cache-en 10`
+2. `$ python3 import.py <WEAVIATE_URL> <CACHE_DIR> [BATCH_SIZE]`
+    - e.g.: `$ python3 import.py http://localhost:8080 cache-en 10`
 
 ## Execute the import WITH Docker (Weaviate with Docker Compose) 
 
@@ -71,7 +71,7 @@ $ docker run -i --network=$WEAVIATE_NETWORK -e weaviate_host=$WEAVIATE_ORIGIN -e
 
 0. Make sure you have Weaviate running .
 1. `$ eexport WEAVIATE_ORIGIN=WEAVIATE_ORIGIN`
-4. `$docker run -i -e weaviate_host=$WEAVIATE_ORIGIN -e cache_dir=<YOUR_CACHE_DIR> -e batch_size=<_YOUR_BATCH_SIZE> semitechnologies/weaviate-demo-newspublications:latest`
+4. `$ docker run -i -e weaviate_host=$WEAVIATE_ORIGIN -e cache_dir=<YOUR_CACHE_DIR> -e batch_size=<_YOUR_BATCH_SIZE> semitechnologies/weaviate-demo-newspublications:latest`
 
 ## Create Docker
 

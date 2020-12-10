@@ -1,3 +1,2 @@
 newspaper3k==0.2.8
 weaviate-client==1.2.0
-weaviate-cli==1.2.0
