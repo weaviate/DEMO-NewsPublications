@@ -5,6 +5,7 @@ import json
 import sys
 from typing import Optional
 import newspaper as news
+from rfc3339 import rfc3339
 
 NEWSPAPERS = {}
 NEWSPAPERS['en'] = {
@@ -88,7 +89,7 @@ def date_to_iso(
         article: news.Article
     ) -> Optional[str]:
     """
-    Get article's data as a ISO format string.
+    Get article's data as a RFC3339 format string.
 
     Parameters
     ----------
@@ -98,12 +99,16 @@ def date_to_iso(
     Returns
     -------
     str
-        ISO formated data of ther article.
+        RFC3339 formated data of ther article.
     """
 
     try:
-        iso_date = article.publish_date.isoformat()
-        return iso_date
+        rfc3339_date = rfc3339(
+            timestamp=article.publish_date,
+            utc=True,
+            use_system_timezone=False
+        )
+        return rfc3339_date
     except:
         return None
 

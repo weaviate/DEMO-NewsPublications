@@ -31,8 +31,8 @@ def batcher_callback(
     for result in results:
         if result['result'].get('status', 'SUCCESS') != 'SUCCESS':
             print(result)
-        if 'error' in result['result']:
-            print(result)
+        elif ('errors' in result['result']):
+            print(result['errors'])
 
 
 def iterate_json(
