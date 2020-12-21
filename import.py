@@ -32,7 +32,7 @@ def batcher_callback(
         if result['result'].get('status', 'SUCCESS') != 'SUCCESS':
             print(result)
         elif ('errors' in result['result']):
-            print(result['errors'])
+            print(result['result']['errors'])
 
 
 def iterate_json(
