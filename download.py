@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
-import newspaper, uuid, os, json, sys, nltk
+import uuid as uuid_lib
+import os
+import json
+import sys
+from typing import Optional
+import newspaper as news
+from rfc3339 import rfc3339
 
-NEWSPAPERS = {
+NEWSPAPERS = {}
+NEWSPAPERS['en'] = {
     'ft': 'https://www.ft.com',
     'nyt': 'https://www.theguardian.com/international',
     'guardian': 'https://www.nytimes.com',
@@ -15,78 +22,190 @@ NEWSPAPERS = {
     'gi': 'https://www.gameinformer.com/'
 }
 
-def isInCache(uuid):
-    if os.path.isfile('./cache/' + str(uuid) + '.json'):
+NEWSPAPERS['nl'] = {
+    'dvhn': 'https://www.dvhn.nl/',
+    'nos': 'https://nos.nl/',
+    'nu': 'https://nu.nl/',
+    'ad': 'https://ad.nl/',
+    'nrc': 'https://nrc.nl/',
+    'telegraaf': 'https://www.telegraaf.nl/',
+    'fd': 'https://fd.nl/',
+    'volkskrant': 'https://volkskrant.nl/',
+    'trouw': 'https://trouw.nl/',
+    'rtl': 'https://www.rtlnieuws.nl/',
+    'elsevier': 'https://www.ewmagazine.nl/',
+    'parool': 'https://www.parool.nl/',
+    'gelderlander': 'https://www.gelderlander.nl/',
+    'tweakers': 'https://tweakers.net/nieuws/',
+    'metro': 'https://www.metronieuws.nl/'
+}
+
+
+def is_in_cache(
+        uuid: str,
+        cache_path: str
+    ) -> bool:
+    """
+    Check if file in cache directory.
+
+    Parameters
+    ----------
+    uuid : str
+        Uuid of the file to check.
+    cache_path : str
+        Dirctory where to check fo the file.
+
+    Returns
+    -------
+    bool
+        True if file is in the directory, False otherwise.
+    """
+
+    if os.path.isfile(cache_path + str(uuid) + '.json'):
         return True
     return False
 
-def saveToCache(obj):
-    f = open('./cache/' + obj['id'] + '.json', 'x')
-    f.write(json.dumps(obj))
-    f.close()
-    if os.path.getsize('./cache/' + obj['id'] + '.json') < 2000:
-        os.remove('./cache/' + obj['id'] + '.json')
+def save_to_cache(
+        obj: dict,
+        cache_path: str
+    ) -> None:
+    """
+    Save newspaper object in a cache directory.
 
-def dateToIso(i):
+    Parameters
+    ----------
+    obj : dict
+        Newspaper object as a dict.
+    cache_path : str
+        Path where to save the newspaper.
+    """
 
-    isoDate = None
+    with open(cache_path + obj['id'] + '.json', 'x') as file_:
+        file_.write(json.dumps(obj))
+    if os.path.getsize(cache_path + obj['id'] + '.json') < 2000: # TODO: WHY 2000?
+        os.remove(cache_path + obj['id'] + '.json')
+
+def date_to_iso(
+        article: news.Article
+    ) -> Optional[str]:
+    """
+    Get article's data as a RFC3339 format string.
+
+    Parameters
+    ----------
+    article : newspaper.Article
+        Article for wich to get the data.
+
+    Returns
+    -------
+    str
+        RFC3339 formated data of ther article.
+    """
 
     try:
-        isoDate = article.publish_date.isoformat()
+        rfc3339_date = rfc3339(
+            timestamp=article.publish_date,
+            utc=True,
+            use_system_timezone=False
+        )
+        return rfc3339_date
     except:
-        return isoDate
-    
-    return isoDate
+        return None
 
-# download nltk english 
-# nltk.download()
 
-# which newspaper to load?
-if sys.argv[1] not in NEWSPAPERS:
-    print("ERROR, CHOOSE A NEWSPAPER")
-    print(NEWSPAPERS)
-    exit(1)
+def build_actual_newspaper(
+        lang: str,
+        newspaper: str,
+        cache_path: str
+    ) -> None:
+    """
+    Download and save newspaper articles as weaviate schemas.
 
-# build the actual newspaper
-for articleRaw in newspaper.build(NEWSPAPERS[sys.argv[1]], memoize_articles=False).articles:
+    Parameters
+    ----------
+    lang : str
+        Language of the newspaper.
+    newspaper : str
+        Newspaper title.
+    cache_path : str
+        Cache directory path.
+    """
+    # Build the actual newspaper
+    for article_raw in news.build(NEWSPAPERS[lang][newspaper], memoize_articles=False).articles:
+        article_uuid = uuid_lib.uuid3(uuid_lib.NAMESPACE_DNS, article_raw.url)
+        if not is_in_cache(article_uuid, cache_path):
+            try:
+                article = news.Article(article_raw.url)
+                article.download()
+                article.parse()
+                article.nlp()
+                if (article.meta_lang == lang or article.meta_lang is None) and \
+                    article.title != '' and \
+                    article.title is not None and \
+                    article.summary != '' and \
+                    article.summary is not None: # TODO: WHY article.meta_lag can be None too?
 
-    articleUuid = uuid.uuid3(uuid.NAMESPACE_DNS, articleRaw.url)
+                    if lang == 'nl' and 'Puzzel' in article.title:
+                        # TODO: Should it also skip it for English?
+                        continue
 
-    if isInCache(articleUuid) == False:
-    
-        try:
+                    # create the cache obj
+                    cache_object = {
+                        'id': str(article_uuid),
+                        'title': article.title,
+                        'url': article.url,
+                        'summary': article.summary,
+                        'paragraphs': article.text.split("\n\n"),
+                        'authors': article.authors,
+                        'keywords': article.keywords,
+                        'pubDate': date_to_iso(article),
+                        'publicationId': str(uuid_lib.uuid3(uuid_lib.NAMESPACE_DNS, newspaper))
+                    }
+                    # save to the cache
+                    save_to_cache(cache_object, cache_path)
+                    print("Downloaded: " + article.title)
+            except Exception as exception:
+                print("Something went wrong: ", exception)
+        else:
+            print(f"'{newspaper}' collected from cache")
 
-            article = newspaper.Article(articleRaw.url)
-            article.download()
-            article.parse()
-            article.nlp()
+def print_usage():
+    """
+    Print command-line interface description.
+    """
 
-            if (article.meta_lang == 'en' or article.meta_lang == None) and \
-                article.title != '' and \
-                article.title != None and \
-                article.summary != '' and \
-                article.summary != None:
+    print("Usage: ./download.py <nl | en>  <'newspaper' | -a>")
+    print("\t-a for all sources.")
 
-                # create the cache obj
-                cacheObject = {
-                    'id': str(articleUuid),
-                    'title': article.title,
-                    'url': article.url,
-                    'summary': article.summary,
-                    'paragraphs': article.text.split("\n\n"),
-                    'authors': article.authors,
-                    'keywords': article.keywords,
-                    'pubDate': dateToIso(article),
-                    'publicationId': str(uuid.uuid3(uuid.NAMESPACE_DNS, sys.argv[1]))
-                }
 
-                # save to the cache
-                saveToCache(cacheObject)
+if __name__ == "__main__":
+    # Check number of arguments
+    if len(sys.argv) != 3:
+        print(f"ERROR, Wrong number of arguments, given {len(sys.argv) - 1}, must be 2!")
+        print_usage()
+        sys.exit(1)
+    # Check language provided
+    lang_ = sys.argv[1].lower()
+    if lang_ not in ['en', 'nl']:
+        print("ERROR, Demo does not support this language!")
+        sys.exit(1)
+    cache_path_ = f'./cache-{lang_}/'
+    # which newspaper to load?
+    if sys.argv[2] == '-a':
+        for newspaper_ in NEWSPAPERS[lang_].keys():
+            build_actual_newspaper(
+                lang=lang_,
+                newspaper=newspaper_,
+                cache_path=cache_path_
+            )
 
-                print("downloaded: " + article.title)
-        except Exception as e:
-            print("something went wrong:", str(e))
+    elif sys.argv[2] in NEWSPAPERS[lang_]:
+        build_actual_newspaper(
+            lang=lang_,
+            newspaper=sys.argv[2],
+            cache_path=cache_path_
+        )
     else:
-        print('collected from cache')
-
-
+        print("ERROR, Choose a newspaper!")
+        print(json.dumps(NEWSPAPERS[lang_], indent=4))
+        sys.exit(1)
