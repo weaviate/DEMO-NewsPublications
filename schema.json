@@ -1,181 +1,189 @@
 {
-    "actions": {
-        "classes": [],
-        "type": "action"
-    },
-    "things": {
-        "classes": [
-            {
-                "class": "Publication",
-                "description": "A publication with an online source",
-                "vectorizeClassName": false,
-                "keywords": [
-                    {
-                        "keyword": "newspaper",
-                        "weight": 1.0
-                    },{
-                        "keyword": "magazine",
-                        "weight": 1.0
-                    }
-                ],
-                "properties": [
-                    {
-                        "dataType": [
-                            "string"
-                        ],
-                        "description": "Name of the publication",
-                        "name": "name"
-                    },
-                    {
-                        "dataType": [
-                            "geoCoordinates"
-                        ],
-                        "description": "Geo location of the HQ",
-                        "name": "headquartersGeoLocation"
-                    },
-                    {
-                        "dataType": [
-                            "Article"
-                        ],
-                        "description": "The articles this publication has",
-                        "name": "hasArticles",
-                        "cardinality": "many"
-                    }
-                ]
+    "classes": [
+        {
+            "class": "Publication",
+            "description": "A publication with an online source",
+            "moduleConfig": {
+                "text2vec-contextionary": {  
+                  "vectorizeClassName": false
+                }
             },
-            {
-                "class": "Author",
-                "description": "Normalised types",
-                "vectorizeClassName": true,
-                "keywords": [
-                    {
-                        "keyword": "writer",
-                        "weight": 0.8
-                    }
-                ],
-                "properties": [
-                    {
-                        "dataType": [
-                            "string"
-                        ],
-                        "description": "Name of the author",
-                        "name": "name",
+            "properties": [
+                {
+                    "dataType": [
+                        "string"
+                    ],
+                    "description": "Name of the publication",
+                    "name": "name"
+                },
+                {
+                    "dataType": [
+                        "geoCoordinates"
+                    ],
+                    "description": "Geo location of the HQ",
+                    "name": "headquartersGeoLocation"
+                },
+                {
+                    "dataType": [
+                        "Article"
+                    ],
+                    "description": "The articles this publication has",
+                    "name": "hasArticles"
+                }
+            ]
+        },
+        {
+            "class": "Author",
+            "description": "Normalised types",
+            "moduleConfig": {
+                "text2vec-contextionary": {  
+                  "vectorizeClassName": true
+                }
+            },
+            "properties": [
+                {
+                    "dataType": [
+                        "string"
+                    ],
+                    "description": "Name of the author",
+                    "name": "name",
+                    "moduleConfig": {
+                      "text2vec-contextionary": {
                         "vectorizePropertyName": false
-                    },
-                    {
-                        "cardinality": "many",
-                        "dataType": [
-                            "Article"
-                        ],
-                        "description": "Articles this author wrote",
-                        "name": "wroteArticles"
-                    },
-                    {
-                        "cardinality": "many",
-                        "dataType": [
-                            "Publication"
-                        ],
-                        "description": "The publication this author writes for",
-                        "name": "writesFor"
+                      }
                     }
-                ]
+                },
+                {
+                    "dataType": [
+                        "Article"
+                    ],
+                    "description": "Articles this author wrote",
+                    "name": "wroteArticles"
+                },
+                {
+                    "dataType": [
+                        "Publication"
+                    ],
+                    "description": "The publication this author writes for",
+                    "name": "writesFor"
+                }
+            ]
+        },
+        {
+            "class": "Article",
+            "description": "Normalised types",
+            "moduleConfig": {
+                "text2vec-contextionary": {  
+                  "vectorizeClassName": false
+                }
             },
-            {
-                "class": "Article",
-                "description": "Normalised types",
-                "vectorizeClassName": false,
-                "properties": [
-                    {
-                        "dataType": [
-                            "string"
-                        ],
-                        "description": "title of the article",
-                        "name": "title",
-                        "vectorizePropertyName": false,
-                        "index": true
+            "properties": [
+                {
+                    "dataType": [
+                        "string"
+                    ],
+                    "description": "title of the article",
+                    "name": "title",
+                    "moduleConfig": {
+                      "text2vec-contextionary": {
+                        "vectorizePropertyName": false
+                      }
                     },
-                    {
-                        "dataType": [
-                            "string"
-                        ],
-                        "description": "url of the article",
-                        "name": "url",
-                        "vectorizePropertyName": false,
-                        "index": false
+                    "indexInverted": true
+                },
+                {
+                    "dataType": [
+                        "string"
+                    ],
+                    "description": "url of the article",
+                    "name": "url",
+                    "moduleConfig": {
+                      "text2vec-contextionary": {
+                        "vectorizePropertyName": false
+                      }
                     },
-                    {
-                        "dataType": [
-                            "text"
-                        ],
-                        "description": "summary of the article",
-                        "name": "summary",
-                        "vectorizePropertyName": false,
-                        "index": true
+                    "indexInverted": false
+                },
+                {
+                    "dataType": [
+                        "text"
+                    ],
+                    "description": "summary of the article",
+                    "name": "summary",
+                    "moduleConfig": {
+                      "text2vec-contextionary": {
+                        "vectorizePropertyName": false
+                      }
                     },
-                    {
-                        "dataType": [
-                            "date"
-                        ],
-                        "description": "date of publication of the article",
-                        "name": "publicationDate"
-                    },
-                    {
-                        "dataType": [
-                            "int"
-                        ],
-                        "description": "Words in this article",
-                        "name": "wordCount"
-                    },
-                    {
-                        "dataType": [
-                            "Author", "Publication"
-                        ],
-                        "description": "authors this article has",
-                        "name": "hasAuthors",
-                        "cardinality": "many"
-                    },
-                    {
-                        "dataType": [
-                            "Publication"
-                        ],
-                        "description": "publication this article is in",
-                        "name": "inPublication",
-                        "cardinality": "atMostOne"
-                    },
-                    {
-                        "dataType": [
-                            "Category"
-                        ],
-                        "description": "category this article is of",
-                        "name": "ofCategory",
-                        "cardinality": "atMostOne"
-                    },
-                    {
-                        "dataType": [
-                            "boolean"
-                        ],
-                        "description": "whether the article is currently accessible through the url",
-                        "name": "isAccessible"
-                    }
-                ]
+                    "indexInverted": true
+                },
+                {
+                    "dataType": [
+                        "date"
+                    ],
+                    "description": "date of publication of the article",
+                    "name": "publicationDate"
+                },
+                {
+                    "dataType": [
+                        "int"
+                    ],
+                    "description": "Words in this article",
+                    "name": "wordCount"
+                },
+                {
+                    "dataType": [
+                        "Author", "Publication"
+                    ],
+                    "description": "authors this article has",
+                    "name": "hasAuthors"
+                },
+                {
+                    "dataType": [
+                        "Publication"
+                    ],
+                    "description": "publication this article is in",
+                    "name": "inPublication"
+                },
+                {
+                    "dataType": [
+                        "Category"
+                    ],
+                    "description": "category this article is of",
+                    "name": "ofCategory"
+                },
+                {
+                    "dataType": [
+                        "boolean"
+                    ],
+                    "description": "whether the article is currently accessible through the url",
+                    "name": "isAccessible"
+                }
+            ]
+        },
+        {
+            "class": "Category",
+            "description": "Category an article is a type off",
+            "moduleConfig": {
+                "text2vec-contextionary": {  
+                  "vectorizeClassName": false
+                }
             },
-            {
-                "class": "Category",
-                "description": "Category an article is a type off",
-                "vectorizeClassName": false,
-                "properties": [
-                    {
-                        "dataType": [
-                            "string"
-                        ],
-                        "description": "category name",
-                        "name": "name",
-                        "vectorizePropertyName": false,
-                        "index": true
-                    }
-                ]
-            }
-        ],
-        "type": "thing"
-    }
+            "properties": [
+                {
+                    "dataType": [
+                        "string"
+                    ],
+                    "description": "category name",
+                    "name": "name",
+                    "moduleConfig": {
+                      "text2vec-contextionary": {
+                        "vectorizePropertyName": false
+                      }
+                    },
+                    "indexInverted": true
+                }
+            ]
+        }
+    ]
 }
