@@ -13,7 +13,7 @@ Make sure to have Python3 and pip3 installed.
 Only if you want to start with a fresh dataset (the cache folder is populated);
 
 1. `$ rm ./cache-en/*.json` for English dataset and `$ rm ./cache-nl/*.json` for Dutch dataset
-2. `$ python3 download.py ft <nl | en>  <'newspaper' | -a>`. The `-a` option is for all newspapers implemented. Below is the list of the available newspapers.
+2. `$ python3 download.py <nl | en>  <'newspaper' | -a>`. The `-a` option is for all newspapers implemented. Below is the list of the available newspapers.
 
 List of available newspapers.
 1. English:

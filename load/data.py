@@ -94,19 +94,17 @@ class Loader:
         Parameters
         ----------
         author_ids : list
-            A list of authors uuids to that worte the Article.
+            A list of authors uuids to that wrote the Article.
         article_id : str
             UUID of the Article.
         """
 
         for author_id in author_ids:
             self.batcher.add_reference(
-                from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                from_thing_class_name="Article",
-                from_thing_uuid=article_id,
-                from_property_name="hasAuthors",
-                to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                to_thing_uuid=author_id,
+                "Article",
+                article_id,
+                "hasAuthors",
+                author_id,
             )
 
     def add_article(self,
@@ -143,20 +141,16 @@ class Loader:
             self.batcher.add_data_object(article_object, "Article", article_id)
             # Add reference to weaviate
             self.batcher.add_reference(
-                from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                from_thing_class_name="Article",
-                from_thing_uuid=article_id,
-                from_property_name="inPublication",
-                to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                to_thing_uuid=data['publicationId'],
+                "Article",
+                article_id,
+                "inPublication",
+                data['publicationId'],
             )
             self.batcher.add_reference(
-                from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                from_thing_class_name="Publication",
-                from_thing_uuid=data['publicationId'],
-                from_property_name="hasArticles",
-                to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                to_thing_uuid=article_id
+                "Publication",
+                data['publicationId'],
+                "hasArticles",
+                article_id
             )
             self.add_ref_article_authors(author_ids, article_id)
 
@@ -193,20 +187,16 @@ class Loader:
                 uuid=author_uuid,
             )
             self.batcher.add_reference(
-                from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                from_thing_class_name="Author",
-                from_thing_uuid=author_uuid,
-                from_property_name="writesFor",
-                to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                to_thing_uuid=publication_id
+                "Author",
+                author_uuid,
+                "writesFor",
+                publication_id
             )
             self.batcher.add_reference(
-                from_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                from_thing_class_name="Author",
-                from_thing_uuid=author_uuid,
-                from_property_name="wroteArticles",
-                to_semantic_type=weaviate.SEMANTIC_TYPE_THINGS,
-                to_thing_uuid=article_id
+                "Author",
+                author_uuid,
+                "wroteArticles",
+                article_id
             )
             return author_uuid
         return None
