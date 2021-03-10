@@ -20,6 +20,9 @@ services:
       resources:
         reservations:
           devices:
-          - capabilities: [gpu]      
+          - capabilities: 
+            - gpu
     environment:
-      ENABLE_CUDA: 1
+      - ENABLE_CUDA=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIE=all
