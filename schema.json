@@ -4,7 +4,7 @@
             "class": "Publication",
             "description": "A publication with an online source",
             "moduleConfig": {
-                "text2vec-contextionary": {  
+                "text2vec-transformers": {  
                   "vectorizeClassName": false
                 }
             },
@@ -36,7 +36,7 @@
             "class": "Author",
             "description": "Normalised types",
             "moduleConfig": {
-                "text2vec-contextionary": {  
+                "text2vec-transformers": {  
                   "vectorizeClassName": true
                 }
             },
@@ -48,7 +48,7 @@
                     "description": "Name of the author",
                     "name": "name",
                     "moduleConfig": {
-                      "text2vec-contextionary": {
+                      "text2vec-transformers": {
                         "vectorizePropertyName": false
                       }
                     }
@@ -73,7 +73,7 @@
             "class": "Article",
             "description": "Normalised types",
             "moduleConfig": {
-                "text2vec-contextionary": {  
+                "text2vec-transformers": {  
                   "vectorizeClassName": false
                 }
             },
@@ -85,7 +85,7 @@
                     "description": "title of the article",
                     "name": "title",
                     "moduleConfig": {
-                      "text2vec-contextionary": {
+                      "text2vec-transformers": {
                         "vectorizePropertyName": false
                       }
                     },
@@ -98,7 +98,7 @@
                     "description": "url of the article",
                     "name": "url",
                     "moduleConfig": {
-                      "text2vec-contextionary": {
+                      "text2vec-transformers": {
                         "vectorizePropertyName": false
                       }
                     },
@@ -111,7 +111,7 @@
                     "description": "summary of the article",
                     "name": "summary",
                     "moduleConfig": {
-                      "text2vec-contextionary": {
+                      "text2vec-transformers": {
                         "vectorizePropertyName": false
                       }
                     },
@@ -165,7 +165,7 @@
             "class": "Category",
             "description": "Category an article is a type off",
             "moduleConfig": {
-                "text2vec-contextionary": {  
+                "text2vec-transformers": {  
                   "vectorizeClassName": false
                 }
             },
@@ -177,7 +177,7 @@
                     "description": "category name",
                     "name": "name",
                     "moduleConfig": {
-                      "text2vec-contextionary": {
+                      "text2vec-transformers": {
                         "vectorizePropertyName": false
                       }
                     },
