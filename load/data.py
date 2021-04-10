@@ -7,8 +7,8 @@ import weaviate.tools
 
 
 def generate_uuid(
-        key: str
-    ) -> str:
+    key: str
+) -> str:
     """
     Generate an universally unique identifier (uuid).
 
@@ -32,15 +32,15 @@ class Loader:
     It makes use of the weaviate.tools.Batcher to upload data in batches.
     """
 
-    def __init__(self, batcher:weaviate.tools.Batcher):
+    def __init__(self, batcher: weaviate.tools.Batcher):
         self.batcher = batcher
         self.loaded_articles = []
         self.load_category = self._load_publication_or_category
         self.load_publication = self._load_publication_or_category
 
     def _load_publication_or_category(self,
-            data: dict
-        ) -> None:
+                                      data: dict
+                                      ) -> None:
         """
         Load Publication or Category into weaviate.
 
@@ -57,8 +57,8 @@ class Loader:
         )
 
     def load_authors_article(self,
-            data: dict
-        ) -> None:
+                             data: dict
+                             ) -> None:
         """
         Load Authors and Article into weaviate.
 
@@ -73,7 +73,8 @@ class Loader:
         ##### ADD AUTHORS #####
         author_ids = []
         for author in data['authors']:
-            author_id = self.add_author(author, article_id, data['publicationId'])
+            author_id = self.add_author(
+                author, article_id, data['publicationId'])
             if author_id is not None:
                 author_ids.append(author_id)
             else:
@@ -84,9 +85,9 @@ class Loader:
         self.add_article(article_id, data, author_ids)
 
     def add_ref_article_authors(self,
-            author_ids: list,
-            article_id: str
-        ) -> None:
+                                author_ids: list,
+                                article_id: str
+                                ) -> None:
         """
         Add Reference of the Article to the Authors into Batcher
         to be loaded into weaviate.
@@ -108,10 +109,10 @@ class Loader:
             )
 
     def add_article(self,
-            article_id: str,
-            data: dict,
-            author_ids: str
-        ) -> None:
+                    article_id: str,
+                    data: dict,
+                    author_ids: str
+                    ) -> None:
         """
         Add Article into Batcher to be loaded into weaviate.
 
@@ -155,10 +156,10 @@ class Loader:
             self.add_ref_article_authors(author_ids, article_id)
 
     def add_author(self,
-            author: str,
-            article_id: str,
-            publication_id: str
-        ) -> Optional[str]:
+                   author: str,
+                   article_id: str,
+                   publication_id: str
+                   ) -> Optional[str]:
         """
         Add Author into Batcher to be loaded into weaviate.
 
@@ -203,9 +204,9 @@ class Loader:
 
 
 def process_input(
-        class_name: str,
-        value: str,
-    ) -> str:
+    class_name: str,
+    value: str,
+) -> str:
     """
     Clean up the data.
 

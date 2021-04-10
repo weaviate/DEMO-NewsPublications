@@ -148,7 +148,7 @@ def main():
         upload_data_to_weaviate(
             client=main_client,
             data_dir=sys.argv[2],
-            batch_size=200
+            batch_size=20
         )
 
 
