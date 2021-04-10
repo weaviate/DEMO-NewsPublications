@@ -85,7 +85,6 @@ Default values for the envirionmental variables:
 
 ## Running with GPU and compose (Debian)
 
-
 ```sh
 # STEP 1
 $ sudo apt install && \
