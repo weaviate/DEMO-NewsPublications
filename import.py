@@ -16,8 +16,8 @@ from load.data import Loader
 
 
 def batcher_callback(
-        results: list
-    ) -> None:
+    results: list
+) -> None:
     """
     Print error message that comes from the batcher update.
 
@@ -27,7 +27,6 @@ def batcher_callback(
         A list of result for object that were uploaded to weaviate using the batcher.
     """
 
-
     for result in results:
         if result['result'].get('status', 'SUCCESS') != 'SUCCESS':
             print(result)
@@ -36,9 +35,9 @@ def batcher_callback(
 
 
 def iterate_json(
-        path: str,
-        callback: Callable[[dict], None]
-    ) -> None:
+    path: str,
+    callback: Callable[[dict], None]
+) -> None:
     """
     Parse cached files and apply a function to each of them.
 
@@ -61,10 +60,10 @@ def iterate_json(
 
 
 def upload_data_to_weaviate(
-        client: weaviate.Client,
-        data_dir: str,
-        batch_size:int = 200
-    ) -> None:
+    client: weaviate.Client,
+    data_dir: str,
+    batch_size: int = 200
+) -> None:
     """
     Upload data to weaviate.
 
@@ -99,12 +98,14 @@ def upload_data_to_weaviate(
         ##### ADD AUTHORS AND ARTICLES #####
         iterate_json(data_dir, loader.load_authors_article)
 
+
 def print_usage():
     """
     Print command-line interface description.
     """
 
     print("Usage: ./import.py <WEAVIATE_URL> <CACHE_DIR> [BATCH_SIZE]")
+
 
 def main():
     """
@@ -113,18 +114,20 @@ def main():
 
     nr_argv = len(sys.argv)
     if nr_argv not in (3, 4):
-        print(f"ERROR: Too many arguments, given {nr_argv} but must be 3 or 4.")
+        print(
+            f"ERROR: Too many arguments, given {nr_argv} but must be 3 or 4.")
         print_usage()
         sys.exit(1)
 
     main_client = weaviate.Client(sys.argv[1])
-    wait_time_limit = 14
+    wait_time_limit = 240
     while not main_client.is_ready():
         if not wait_time_limit:
             sys.stderr.write("\rTIMEOUT: Weaviate not ready. \
                             Try again or check if weaviate is running.\n")
             sys.exit(1)
-        sys.stdout.write(f"\rWait for weaviate to get ready. {wait_time_limit:02d} seconds left.")
+        sys.stdout.write(
+            f"\rWait for weaviate to get ready. {wait_time_limit:02d} seconds left.")
         sys.stdout.flush()
         wait_time_limit -= 2
         time.sleep(2.0)
@@ -147,6 +150,7 @@ def main():
             data_dir=sys.argv[2],
             batch_size=200
         )
+
 
 if __name__ == "__main__":
     main()
