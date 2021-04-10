@@ -88,6 +88,7 @@ Default values for the envirionmental variables:
 ```sh
 # STEP 1
 $ sudo apt install && \
+sudo apt update && \
 sudo apt install gcc make && \
 BASE_URL=https://us.download.nvidia.com/tesla && \
 DRIVER_VERSION=450.80.02 && \
@@ -121,4 +122,10 @@ sudo usermod -aG docker $USER && \
 sudo docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi && \
 sudo sysctl -w vm.max_map_count=262144 && \
 exit
+```
+
+You can validate if the GPUs are supported by running:
+
+``` sh
+$ docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
 ```
