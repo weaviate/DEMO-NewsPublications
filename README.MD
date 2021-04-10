@@ -82,3 +82,43 @@ Default values for the envirionmental variables:
 - **weaviate_host=http://localhost:8080**
 - **cache_dir=cache-en**
 - **batch_size=200**
+
+## Running with GPU and compose (Debian)
+
+```sh
+# STEP 1
+$ sudo apt install && \
+sudo apt install gcc make && \
+BASE_URL=https://us.download.nvidia.com/tesla && \
+DRIVER_VERSION=450.80.02 && \
+curl -fSsl -O $BASE_URL/$DRIVER_VERSION/NVIDIA-Linux-x86_64-$DRIVER_VERSION.run && \
+sudo sh NVIDIA-Linux-x86_64-$DRIVER_VERSION.run
+```
+
+```sh
+# STEP 2 (installs both docker-compose and nvidia support for Docker)
+$ sudo apt-get update && \
+sudo apt-get -qq -y install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    git \
+    jq \
+    software-properties-common && \
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && \
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable" && \
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - && \
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && \
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list && \
+sudo apt-get update && \
+sudo apt-get -qq -y install nvidia-container-runtime nvidia-docker2 docker-ce && \
+sudo curl -L https://github.com/docker/compose/releases/download/1.28.5/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && \
+sudo chmod +x /usr/local/bin/docker-compose && \
+sudo usermod -aG docker $USER && \
+sudo docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi && \
+sudo sysctl -w vm.max_map_count=262144 && \
+exit
+```
