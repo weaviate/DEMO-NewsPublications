@@ -102,10 +102,10 @@ class Loader:
 
         for author_id in author_ids:
             self.batcher.add_reference(
-                "Article",
-                article_id,
-                "hasAuthors",
-                author_id,
+                from_object_uuid=article_id,
+                from_object_class_name="Article",
+                from_property_name="hasAuthors",
+                to_object_uuid=author_id,
             )
 
     def add_article(self,
@@ -139,19 +139,23 @@ class Loader:
             if data['pubDate'] is not None and data['pubDate'] != '':
                 article_object['publicationDate'] = data['pubDate']
             # Add article to weaviate
-            self.batcher.add_data_object(article_object, "Article", article_id)
+            self.batcher.add_data_object(
+                data_object=article_object,
+                class_name="Article",
+                uuid=article_id
+            )
             # Add reference to weaviate
             self.batcher.add_reference(
-                "Article",
-                article_id,
-                "inPublication",
-                data['publicationId'],
+                from_object_uuid=article_id,
+                from_object_class_name="Article",
+                from_property_name="inPublication",
+                to_object_uuid=data['publicationId'],
             )
             self.batcher.add_reference(
-                "Publication",
-                data['publicationId'],
-                "hasArticles",
-                article_id
+                from_object_uuid=data['publicationId'],
+                from_object_class_name="Publication",
+                from_property_name="hasArticles",
+                to_object_uuid=article_id
             )
             self.add_ref_article_authors(author_ids, article_id)
 
@@ -188,16 +192,16 @@ class Loader:
                 uuid=author_uuid,
             )
             self.batcher.add_reference(
-                "Author",
-                author_uuid,
-                "writesFor",
-                publication_id
+                from_object_uuid=author_uuid,
+                from_object_class_name="Author",
+                from_property_name="writesFor",
+                to_object_uuid=publication_id
             )
             self.batcher.add_reference(
-                "Author",
-                author_uuid,
-                "wroteArticles",
-                article_id
+                from_object_uuid=author_uuid,
+                from_object_class_name="Author",
+                from_property_name="wroteArticles",
+                to_object_uuid=article_id
             )
             return author_uuid
         return None
