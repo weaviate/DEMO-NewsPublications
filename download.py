@@ -53,7 +53,7 @@ def is_in_cache(
     uuid : str
         Uuid of the file to check.
     cache_path : str
-        Dirctory where to check fo the file.
+        The directory where to check fo the file.
 
     Returns
     -------
@@ -80,10 +80,10 @@ def save_to_cache(
         Path where to save the newspaper.
     """
 
-    with open(cache_path + obj['id'] + '.json', 'x') as file_:
-        file_.write(json.dumps(obj))
-    if os.path.getsize(cache_path + obj['id'] + '.json') < 2000: # TODO: WHY 2000?
-        os.remove(cache_path + obj['id'] + '.json')
+    if sys.getsizeof(obj) >= 2000:
+        with open(cache_path + obj['id'] + '.json', 'x') as file_:
+            file_.write(json.dumps(obj))
+        print("Downloaded: " + obj['title'])
 
 def date_to_iso(
         article: news.Article
@@ -94,12 +94,12 @@ def date_to_iso(
     Parameters
     ----------
     article : newspaper.Article
-        Article for wich to get the data.
+        Article for which to get the data.
 
     Returns
     -------
     str
-        RFC3339 formated data of ther article.
+        RFC3339 formated data of there article.
     """
 
     try:
@@ -119,7 +119,7 @@ def build_actual_newspaper(
         cache_path: str
     ) -> None:
     """
-    Download and save newspaper articles as weaviate schemas.
+    Download and save newspaper articles as Weaviate schemas.
 
     Parameters
     ----------
@@ -163,7 +163,6 @@ def build_actual_newspaper(
                     }
                     # save to the cache
                     save_to_cache(cache_object, cache_path)
-                    print("Downloaded: " + article.title)
             except Exception as exception:
                 print("Something went wrong: ", exception)
         else:

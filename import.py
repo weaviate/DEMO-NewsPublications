@@ -24,7 +24,7 @@ def batcher_callback(
     Parameters
     ----------
     results : list
-        A list of result for object that were uploaded to weaviate using the batcher.
+        A list of result for object that were uploaded to Weaviate using the batcher.
     """
 
     for result in results:
@@ -47,7 +47,7 @@ def iterate_json(
         Cache directory to read files from (only JSON format files supported at the moment).
     callback : Callable[[dict], None]
         The callback function used on each JSON file.
-        Ex.: Can be a function that adds to weaviated, or deletes.
+        Ex.: Can be a function that adds to Weaviate, or deletes.
     """
 
     for filename in os.listdir(path):
@@ -70,7 +70,7 @@ def upload_data_to_weaviate(
     Parameters
     ----------
     client: weaviate.Client
-        Weaviate client.
+        The Weaviate client.
     data_dir: str
         Directory with the data files to read in.
     batch_size:int = 200
