@@ -116,7 +116,7 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID) && \
 curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list && \
 sudo apt-get update && \
 sudo apt-get -qq -y install nvidia-container-runtime nvidia-docker2 docker-ce && \
-sudo curl -L https://github.com/docker/compose/releases/download/1.28.5/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && \
+sudo curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && \
 sudo chmod +x /usr/local/bin/docker-compose && \
 sudo usermod -aG docker $USER && \
 sudo docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi && \
