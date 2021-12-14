@@ -2,9 +2,10 @@
 
 This demo shows how Weaviate can be used to explore magazines and newspapers.
 
-_ARTICLES ARE USED FOR DEMO PURPOSES ONLY!_
-
-_IF YOU WANT TO USE THIS DEMO, JUST RUN THE DOCKER FROM THE DOCS https://www.semi.technology/developers/weaviate/current/getting-started/example-datasets.html#news-publications_
+Notes:
+- We use this dataset for the demos in the Weaviate documentation
+- You can use this dataset but note that it's not made for any production use case
+- Run the demo [directly from the docs](https://www.semi.technology/developers/weaviate/current/more-resources/example-datasets.html#news-publications)
 
 ## Installation (for collecting data) (ENGLISH and DUTCH)
 
