@@ -3,3 +3,5 @@ docker-compose.yml
 .idea
 __pycache__
 config.json
+.ipynb_checkpoints
+*.ipynb

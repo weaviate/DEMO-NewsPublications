@@ -2,42 +2,34 @@
 """
 Import data into weaviate script.
 """
-# Import necessary libraries
-# buildin
 import os
 import sys
 import json
 import time
-from typing import Callable
-# installed
-import weaviate
-from weaviate.tools import Batcher
+from typing import Callable, Optional
+from weaviate import Client
 from load.data import Loader
 
 
-def batcher_callback(
-    results: list
-) -> None:
+def batch_callback(results: Optional[list]) -> None:
     """
-    Print error message that comes from the batcher update.
+    Log error message that comes from the batcher update.
 
     Parameters
     ----------
-    results : list
+    results : Optional[list]
         A list of result for object that were uploaded to Weaviate using the batcher.
     """
 
-    for result in results:
-        if result['result'].get('status', 'SUCCESS') != 'SUCCESS':
-            print(result)
-        elif ('errors' in result['result']):
-            print(result['result']['errors'])
+    if results is not None:
+        for result in results:
+            if 'result' in result and 'errors' in result['result']:
+                if 'error' in result['result']['errors']:
+                    for message in result['result']['errors']['error']:
+                        print(message['message'])
 
 
-def iterate_json(
-    path: str,
-    callback: Callable[[dict], None]
-) -> None:
+def iterate_json(path: str, callback: Callable[[dict], None]) -> None:
     """
     Parse cached files and apply a function to each of them.
 
@@ -59,11 +51,7 @@ def iterate_json(
                 callback(data)
 
 
-def upload_data_to_weaviate(
-    client: weaviate.Client,
-    data_dir: str,
-    batch_size: int = 200
-) -> None:
+def upload_data_to_weaviate(client: Client, data_dir: str, batch_size: int = 200) -> None:
     """
     Upload data to weaviate.
 
@@ -75,18 +63,17 @@ def upload_data_to_weaviate(
         Directory with the data files to read in.
     batch_size:int = 200
         Number of objects to upload at once to weaviate.
-
-    Returns
-    -------
-    None
     """
 
-    with Batcher(
-        client=client,
+    client.batch.configure(
         batch_size=batch_size,
-        return_values_callback=batcher_callback
-    ) as batcher:
-        loader = Loader(batcher)
+        dynamic=True,
+        timeout_retries=5,
+        callback=batch_callback,
+    )
+
+    with client.batch as batch:
+        loader = Loader(batch)
 
         if not data_dir.endswith("-nl"):
             ##### ADD CATEGORIES #####
@@ -99,7 +86,7 @@ def upload_data_to_weaviate(
         iterate_json(data_dir, loader.load_authors_article)
 
 
-def print_usage():
+def print_usage() -> None:
     """
     Print command-line interface description.
     """
@@ -119,7 +106,7 @@ def main():
         print_usage()
         sys.exit(1)
 
-    main_client = weaviate.Client(sys.argv[1])
+    main_client = Client(sys.argv[1])
     wait_time_limit = 240
     while not main_client.is_ready():
         if not wait_time_limit:

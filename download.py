@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import uuid as uuid_lib
 import os
 import json
 import sys
 from typing import Optional
+import uuid as uuid_lib
 import newspaper as news
 from rfc3339 import rfc3339
 
@@ -80,7 +80,7 @@ def save_to_cache(
         Path where to save the newspaper.
     """
 
-    if sys.getsizeof(obj) >= 2000:
+    if sys.getsizeof(str(obj)) >= 2000:
         with open(cache_path + obj['id'] + '.json', 'x') as file_:
             file_.write(json.dumps(obj))
         print("Downloaded: " + obj['title'])
