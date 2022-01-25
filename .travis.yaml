@@ -1,0 +1,22 @@
+os: linux
+dist: xenial
+language: generic
+services:
+  - docker
+
+env:
+  global:
+  - DOCKER_CREDENTIALS
+
+before_install:
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+jobs:
+  include:
+    - stage: "Build and Push image to DockerHub"
+      name: "Build and Push image to DockerHub"
+      if: tag IS present
+      script:
+        - docker build -t semitechnologies/weaviate-demo-newspublications:latest .
+        - docker tag semitechnologies/weaviate-demo-newspublications:latest semitechnologies/weaviate-demo-newspublications:$TRAVIS_TAG
+        - docker push --all-tags semitechnologies/weaviate-demo-newspublications
