@@ -5,7 +5,7 @@ This demo shows how Weaviate can be used to explore magazines and newspapers.
 Notes:
 - We use this dataset for the demos in the Weaviate documentation
 - You can use this dataset but note that it's not made for any production use case
-- Run the demo [directly from the docs](https://www.semi.technology/developers/weaviate/current/more-resources/example-datasets.html#news-publications)
+- Run the demo [directly from the docs](https://weaviate.io/developers/weaviate/current/more-resources/example-datasets.html#news-publications)
 
 ## Installation (for collecting data) (ENGLISH and DUTCH)
 
@@ -54,7 +54,7 @@ List of available newspapers.
 
 ## Execute the import WITH Docker (Weaviate with Docker Compose) 
 
-0. Make sure you have Weaviate running (See [Install Weaviate with Docker Compose](https://www.semi.technology/developers/weaviate/current/getting-started/installation.html#docker-compose "Docker Compose")).
+0. Make sure you have Weaviate running (See [Install Weaviate with Docker Compose](https://weaviate.io/developers/weaviate/current/getting-started/installation.html#docker-compose "Docker Compose")).
 1. `$ export WEAVIATE_ID=$(echo ${PWD##*/}_weaviate_1 | tr "[:upper:]" "[:lower:]")`
 2. `$ export WEAVIATE_ORIGIN="http://$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $WEAVIATE_ID):8080"`
 3. `$ export WEAVIATE_NETWORK=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.NetworkID}}{{end}}' $WEAVIATE_ID)`
