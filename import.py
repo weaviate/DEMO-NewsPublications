@@ -29,7 +29,7 @@ def batch_callback(results: Optional[list]) -> None:
                         print(message['message'])
 
 
-def iterate_json(path: str, callback: Callable[[dict], None]) -> None:
+def iterate_json(path: str, callback: Callable[[dict], None], max_counter: int = 0) -> None:
     """
     Parse cached files and apply a function to each of them.
 
@@ -42,6 +42,7 @@ def iterate_json(path: str, callback: Callable[[dict], None]) -> None:
         Ex.: Can be a function that adds to Weaviate, or deletes.
     """
 
+    counter = 0
     for filename in os.listdir(path):
         # Use only JSON file formats.
         if filename.endswith(".json"):
@@ -49,6 +50,10 @@ def iterate_json(path: str, callback: Callable[[dict], None]) -> None:
             with open(file_path) as file:
                 data = json.load(file)
                 callback(data)
+        if max_counter != 0:
+            counter += 1
+            if counter >= max_counter:
+                break
 
 
 def upload_data_to_weaviate(client: Client, data_dir: str, batch_size: int = 200) -> None:
@@ -113,7 +118,7 @@ def main():
         #     password=os.environ["WCS_PASSWORD"]
         # )
         additional_headers={
-            "X-HuggingFace-Api-Key": os.environ["HUGGINGFACE_APIKEY"]
+            "X-OpenAI-Api-Key": os.environ["OPENAI_APIKEY"]
         }
     )
     wait_time_limit = 240

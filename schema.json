@@ -3,11 +3,10 @@
         {
             "class": "Publication",
             "description": "A publication with an online source",
-            "vectorizer": "text2vec-huggingface",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-huggingface": {
-                  "vectorizeClassName": false,
-                  "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "text2vec-openai": {
+                  "vectorizeClassName": false
                 }
             },
             "properties": [
@@ -38,11 +37,10 @@
         {
             "class": "Author",
             "description": "Normalised types",
-            "vectorizer": "text2vec-huggingface",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-huggingface": {
-                  "vectorizeClassName": true,
-                  "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "text2vec-openai": {
+                  "vectorizeClassName": true
                 }
             },
             "properties": [
@@ -54,7 +52,7 @@
                     "name": "name",
                     "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-huggingface": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     }
@@ -78,11 +76,10 @@
         {
             "class": "Article",
             "description": "Normalised types",
-            "vectorizer": "text2vec-huggingface",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-huggingface": {
-                  "vectorizeClassName": false,
-                  "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "text2vec-openai": {
+                  "vectorizeClassName": false
                 }
             },
             "properties": [
@@ -94,7 +91,7 @@
                     "name": "title",
                     "tokenization": "word",
                     "moduleConfig": {
-                      "text2vec-huggingface": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
@@ -109,7 +106,7 @@
                     "name": "url",
                     "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-huggingface": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
@@ -124,7 +121,7 @@
                     "name": "summary",
                     "tokenization": "word",
                     "moduleConfig": {
-                      "text2vec-huggingface": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
@@ -178,11 +175,10 @@
         {
             "class": "Category",
             "description": "Category an article is a type off",
-            "vectorizer": "text2vec-huggingface",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-huggingface": {
-                  "vectorizeClassName": false,
-                  "model": "sentence-transformers/all-MiniLM-L6-v2"
+                "text2vec-openai": {
+                  "vectorizeClassName": false
                 }
             },
             "properties": [
@@ -194,7 +190,7 @@
                     "name": "name",
                     "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-huggingface": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
