@@ -50,10 +50,13 @@ def iterate_json(path: str, callback: Callable[[dict], None], max_counter: int =
             with open(file_path) as file:
                 data = json.load(file)
                 callback(data)
+
+        counter += 1
         if max_counter != 0:
-            counter += 1
             if counter >= max_counter:
                 break
+        if counter % 50 == 0:
+            time.sleep(2)
 
 
 def upload_data_to_weaviate(client: Client, data_dir: str, batch_size: int = 200) -> None:
