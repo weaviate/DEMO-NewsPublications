@@ -3,17 +3,20 @@
         {
             "class": "Publication",
             "description": "A publication with an online source",
+            "vectorizer": "text2vec-huggingface",
             "moduleConfig": {
-                "text2vec-transformers": {  
-                  "vectorizeClassName": false
+                "text2vec-huggingface": {
+                  "vectorizeClassName": false,
+                  "model": "sentence-transformers/all-MiniLM-L6-v2"
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "Name of the publication",
+                    "tokenization": "whitespace",
                     "name": "name"
                 },
                 {
@@ -35,20 +38,23 @@
         {
             "class": "Author",
             "description": "Normalised types",
+            "vectorizer": "text2vec-huggingface",
             "moduleConfig": {
-                "text2vec-transformers": {  
-                  "vectorizeClassName": true
+                "text2vec-huggingface": {
+                  "vectorizeClassName": true,
+                  "model": "sentence-transformers/all-MiniLM-L6-v2"
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "Name of the author",
                     "name": "name",
+                    "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-huggingface": {
                         "vectorizePropertyName": false
                       }
                     }
@@ -72,37 +78,43 @@
         {
             "class": "Article",
             "description": "Normalised types",
+            "vectorizer": "text2vec-huggingface",
             "moduleConfig": {
-                "text2vec-transformers": {  
-                  "vectorizeClassName": false
+                "text2vec-huggingface": {
+                  "vectorizeClassName": false,
+                  "model": "sentence-transformers/all-MiniLM-L6-v2"
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "title of the article",
                     "name": "title",
+                    "tokenization": "word",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-huggingface": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": true
+                    "indexFilterable": true,
+                    "indexSearchable": true
                 },
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "url of the article",
                     "name": "url",
+                    "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-huggingface": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": false
+                    "indexFilterable": true,
+                    "indexSearchable": false
                 },
                 {
                     "dataType": [
@@ -110,12 +122,14 @@
                     ],
                     "description": "summary of the article",
                     "name": "summary",
+                    "tokenization": "word",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-huggingface": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": true
+                    "indexFilterable": true,
+                    "indexSearchable": true
                 },
                 {
                     "dataType": [
@@ -164,24 +178,28 @@
         {
             "class": "Category",
             "description": "Category an article is a type off",
+            "vectorizer": "text2vec-huggingface",
             "moduleConfig": {
-                "text2vec-transformers": {  
-                  "vectorizeClassName": false
+                "text2vec-huggingface": {
+                  "vectorizeClassName": false,
+                  "model": "sentence-transformers/all-MiniLM-L6-v2"
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "category name",
                     "name": "name",
+                    "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-huggingface": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": true
+                    "indexFilterable": true,
+                    "indexSearchable": true
                 }
             ]
         }

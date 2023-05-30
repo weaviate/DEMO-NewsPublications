@@ -7,7 +7,7 @@ import sys
 import json
 import time
 from typing import Callable, Optional
-from weaviate import Client
+from weaviate import Client, AuthClientPassword
 from load.data import Loader
 
 
@@ -106,7 +106,16 @@ def main():
         print_usage()
         sys.exit(1)
 
-    main_client = Client(sys.argv[1])
+    main_client = Client(
+        sys.argv[1],
+        # auth_client_secret=AuthClientPassword(
+        #     username=os.environ["WCS_USERNAME"],
+        #     password=os.environ["WCS_PASSWORD"]
+        # )
+        additional_headers={
+            "X-HuggingFace-Api-Key": os.environ["HUGGINGFACE_APIKEY"]
+        }
+    )
     wait_time_limit = 240
     while not main_client.is_ready():
         if not wait_time_limit:
