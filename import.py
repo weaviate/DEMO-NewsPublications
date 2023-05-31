@@ -56,7 +56,7 @@ def iterate_json(path: str, callback: Callable[[dict], None], max_counter: int =
             if counter >= max_counter:
                 break
         if counter % 50 == 0:
-            time.sleep(2)
+            time.sleep(2)  # Manually sleep every so often to prevent running over rate limit
 
 
 def upload_data_to_weaviate(client: Client, data_dir: str, batch_size: int = 200) -> None:
@@ -116,13 +116,17 @@ def main():
 
     main_client = Client(
         sys.argv[1],
+        # # ===== Optional, if your Weaviate instance requires authentication =====
+        # # ===== You could also authenticate with a Weaviate API key if configured =====
         # auth_client_secret=AuthClientPassword(
-        #     username=os.environ["WCS_USERNAME"],
-        #     password=os.environ["WCS_PASSWORD"]
-        # )
-        additional_headers={
-            "X-OpenAI-Api-Key": os.environ["OPENAI_APIKEY"]
-        }
+        #     username=os.environ["WCS_USERNAME"],  # Replace with your username
+        #     password=os.environ["WCS_PASSWORD"]   # Replace with your password
+        # ),
+        #
+        # # ===== Optional, if your vectorizer requires an API key =====
+        # additional_headers={
+        #     "X-OpenAI-Api-Key": os.environ["OPENAI_APIKEY"]  # Replace with your vectorizer
+        # }
     )
     wait_time_limit = 240
     while not main_client.is_ready():

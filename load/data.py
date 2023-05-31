@@ -4,6 +4,7 @@ A Loader class to import data into weaviate.
 import uuid
 from typing import Optional
 from weaviate.batch import Batch
+from weaviate.util import generate_uuid5
 
 
 def generate_uuid(key: str) -> str:
@@ -22,6 +23,7 @@ def generate_uuid(key: str) -> str:
     """
 
     return str(uuid.uuid3(uuid.NAMESPACE_DNS, key))
+    # return generate_uuid5(key)
 
 
 class Loader:
@@ -62,7 +64,7 @@ class Loader:
             Raw Article data as a dictionary.
         """
 
-        article_id = generate_uuid(data['title'])
+        article_id = generate_uuid(data['url'])
 
         ##### ADD AUTHORS #####
         author_ids = []
