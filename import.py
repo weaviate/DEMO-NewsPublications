@@ -7,7 +7,7 @@ import sys
 import json
 import time
 from typing import Callable, Optional
-from weaviate import Client
+from weaviate import Client, AuthClientPassword
 from load.data import Loader
 
 
@@ -29,7 +29,7 @@ def batch_callback(results: Optional[list]) -> None:
                         print(message['message'])
 
 
-def iterate_json(path: str, callback: Callable[[dict], None]) -> None:
+def iterate_json(path: str, callback: Callable[[dict], None], max_counter: int = 0) -> None:
     """
     Parse cached files and apply a function to each of them.
 
@@ -42,6 +42,7 @@ def iterate_json(path: str, callback: Callable[[dict], None]) -> None:
         Ex.: Can be a function that adds to Weaviate, or deletes.
     """
 
+    counter = 0
     for filename in os.listdir(path):
         # Use only JSON file formats.
         if filename.endswith(".json"):
@@ -49,6 +50,13 @@ def iterate_json(path: str, callback: Callable[[dict], None]) -> None:
             with open(file_path) as file:
                 data = json.load(file)
                 callback(data)
+
+        counter += 1
+        if max_counter != 0:
+            if counter >= max_counter:
+                break
+        if counter % 50 == 0:
+            time.sleep(2)  # Manually sleep every so often to prevent running over rate limit
 
 
 def upload_data_to_weaviate(client: Client, data_dir: str, batch_size: int = 200) -> None:
@@ -106,7 +114,20 @@ def main():
         print_usage()
         sys.exit(1)
 
-    main_client = Client(sys.argv[1])
+    main_client = Client(
+        sys.argv[1],
+        # # ===== Optional, if your Weaviate instance requires authentication =====
+        # # ===== You could also authenticate with a Weaviate API key if configured =====
+        # auth_client_secret=AuthClientPassword(
+        #     username=os.environ["WCS_USERNAME"],  # Replace with your username
+        #     password=os.environ["WCS_PASSWORD"]   # Replace with your password
+        # ),
+        #
+        # # ===== Optional, if your vectorizer requires an API key =====
+        # additional_headers={
+        #     "X-OpenAI-Api-Key": os.environ["OPENAI_APIKEY"]  # Replace with your vectorizer
+        # }
+    )
     wait_time_limit = 240
     while not main_client.is_ready():
         if not wait_time_limit:

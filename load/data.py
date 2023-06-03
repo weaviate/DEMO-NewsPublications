@@ -4,6 +4,7 @@ A Loader class to import data into weaviate.
 import uuid
 from typing import Optional
 from weaviate.batch import Batch
+from weaviate.util import generate_uuid5
 
 
 def generate_uuid(key: str) -> str:
@@ -22,6 +23,7 @@ def generate_uuid(key: str) -> str:
     """
 
     return str(uuid.uuid3(uuid.NAMESPACE_DNS, key))
+    # return generate_uuid5(key)
 
 
 class Loader:
@@ -62,7 +64,7 @@ class Loader:
             Raw Article data as a dictionary.
         """
 
-        article_id = generate_uuid(data['title'])
+        article_id = generate_uuid(data['url'])
 
         ##### ADD AUTHORS #####
         author_ids = []
@@ -97,6 +99,7 @@ class Loader:
                 from_object_class_name="Article",
                 from_property_name="hasAuthors",
                 to_object_uuid=author_id,
+                to_object_class_name="Author",
             )
 
     def add_article(self, article_id: str, data: dict, author_ids: str) -> None:
@@ -137,12 +140,14 @@ class Loader:
                 from_object_class_name="Article",
                 from_property_name="inPublication",
                 to_object_uuid=data['publicationId'],
+                to_object_class_name="Publication",
             )
             self.batch.add_reference(
                 from_object_uuid=data['publicationId'],
                 from_object_class_name="Publication",
                 from_property_name="hasArticles",
-                to_object_uuid=article_id
+                to_object_uuid=article_id,
+                to_object_class_name="Article",
             )
             self.add_ref_article_authors(author_ids, article_id)
 
@@ -178,13 +183,15 @@ class Loader:
                 from_object_uuid=author_uuid,
                 from_object_class_name="Author",
                 from_property_name="writesFor",
-                to_object_uuid=publication_id
+                to_object_uuid=publication_id,
+                to_object_class_name="Publication",
             )
             self.batch.add_reference(
                 from_object_uuid=author_uuid,
                 from_object_class_name="Author",
                 from_property_name="wroteArticles",
-                to_object_uuid=article_id
+                to_object_uuid=article_id,
+                to_object_class_name="Article",
             )
             return author_uuid
         return None

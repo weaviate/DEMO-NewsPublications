@@ -3,17 +3,19 @@
         {
             "class": "Publication",
             "description": "A publication with an online source",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-transformers": {  
+                "text2vec-openai": {
                   "vectorizeClassName": false
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "Name of the publication",
+                    "tokenization": "whitespace",
                     "name": "name"
                 },
                 {
@@ -35,20 +37,22 @@
         {
             "class": "Author",
             "description": "Normalised types",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-transformers": {  
+                "text2vec-openai": {
                   "vectorizeClassName": true
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "Name of the author",
                     "name": "name",
+                    "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     }
@@ -72,37 +76,42 @@
         {
             "class": "Article",
             "description": "Normalised types",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-transformers": {  
+                "text2vec-openai": {
                   "vectorizeClassName": false
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "title of the article",
                     "name": "title",
+                    "tokenization": "word",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": true
+                    "indexFilterable": true,
+                    "indexSearchable": true
                 },
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "url of the article",
                     "name": "url",
+                    "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": false
+                    "indexFilterable": true,
+                    "indexSearchable": false
                 },
                 {
                     "dataType": [
@@ -110,12 +119,14 @@
                     ],
                     "description": "summary of the article",
                     "name": "summary",
+                    "tokenization": "word",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": true
+                    "indexFilterable": true,
+                    "indexSearchable": true
                 },
                 {
                     "dataType": [
@@ -164,24 +175,27 @@
         {
             "class": "Category",
             "description": "Category an article is a type off",
+            "vectorizer": "text2vec-openai",
             "moduleConfig": {
-                "text2vec-transformers": {  
+                "text2vec-openai": {
                   "vectorizeClassName": false
                 }
             },
             "properties": [
                 {
                     "dataType": [
-                        "string"
+                        "text"
                     ],
                     "description": "category name",
                     "name": "name",
+                    "tokenization": "field",
                     "moduleConfig": {
-                      "text2vec-transformers": {
+                      "text2vec-openai": {
                         "vectorizePropertyName": false
                       }
                     },
-                    "indexInverted": true
+                    "indexFilterable": true,
+                    "indexSearchable": true
                 }
             ]
         }
